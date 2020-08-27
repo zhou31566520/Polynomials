@@ -7,8 +7,8 @@ public class Polynomials {
 
     /*
     × 多项式系数的数组
-    * 例： 2X^3 + 3X^2 + 4X + 5
-    * coefficient = [5,4,3,2]
+    * 例： 2X^3 + 3X^2 + 5
+    * coefficient = [5,0,3,2]
     * */
     private Float[] coefficient ;
 
