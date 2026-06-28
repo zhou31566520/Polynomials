@@ -1,0 +1,7 @@
+{
+  "font_size": 14,
+  "night_mode": false,
+  "download_thread": 3,
+  "download_path": "D:\\PycharmProjects\\novelSpiderReader\\scripts\\books",
+  "log_level": "DEBUG"
+}

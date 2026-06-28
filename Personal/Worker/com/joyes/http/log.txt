@@ -1,0 +1,659 @@
+2026-06-22 20:47:42,025 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-22 20:48:41,149 - INFO - 
+服务已关闭
+2026-06-22 20:48:41,811 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-22 20:49:39,734 - INFO - 
+服务已关闭
+2026-06-22 20:57:39,725 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-22 20:57:44,202 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 56770)
+2026-06-22 20:57:44,320 - INFO - 【线程并发服务】Path: /favicon.ico
+Client: ('127.0.0.1', 2178)
+2026-06-23 10:19:29,725 - INFO - 
+服务已关闭
+2026-06-23 10:19:33,336 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:20:17,610 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 56573)
+2026-06-23 10:39:54,229 - INFO - 
+服务已关闭
+2026-06-23 10:39:56,077 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:40:02,562 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 51324)
+2026-06-23 10:43:26,936 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 10831)
+2026-06-23 10:43:34,539 - INFO - 
+服务已关闭
+2026-06-23 10:43:35,264 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:43:37,040 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 4994)
+2026-06-23 10:44:21,212 - INFO - 
+服务已关闭
+2026-06-23 10:44:21,821 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:44:23,990 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 2119)
+2026-06-23 10:44:36,651 - INFO - 
+服务已关闭
+2026-06-23 10:44:37,101 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:44:41,024 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 36678)
+2026-06-23 10:46:06,330 - INFO - 
+服务已关闭
+2026-06-23 10:46:06,830 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:46:08,906 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 24301)
+2026-06-23 10:46:48,496 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 40883)
+2026-06-23 10:46:49,423 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 37157)
+2026-06-23 10:46:49,620 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 19409)
+2026-06-23 10:46:49,814 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 13966)
+2026-06-23 10:46:49,994 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 18215)
+2026-06-23 10:46:50,184 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 14379)
+2026-06-23 10:46:50,391 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 17990)
+2026-06-23 10:46:50,586 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 25053)
+2026-06-23 10:46:50,779 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 54648)
+2026-06-23 10:46:50,995 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 26462)
+2026-06-23 10:46:51,171 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 57970)
+2026-06-23 10:46:51,358 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 59966)
+2026-06-23 10:46:51,561 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 16994)
+2026-06-23 10:46:51,773 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 50468)
+2026-06-23 10:46:51,952 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 43076)
+2026-06-23 10:54:48,682 - INFO - 
+服务已关闭
+2026-06-23 10:54:49,330 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 10:54:54,573 - INFO - 【线程并发服务】Path: /test/index?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 4217)
+2026-06-23 11:01:31,296 - INFO - 
+服务已关闭
+2026-06-23 11:01:31,833 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:02:00,081 - INFO - 
+服务已关闭
+2026-06-23 11:02:00,831 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:03:22,349 - INFO - 
+服务已关闭
+2026-06-23 11:03:22,940 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:06:03,280 - INFO - 
+服务已关闭
+2026-06-23 11:06:03,934 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:13:52,895 - INFO - 
+服务已关闭
+2026-06-23 11:13:53,758 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:14:32,045 - INFO - 
+服务已关闭
+2026-06-23 11:14:32,601 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:18:17,383 - INFO - 
+服务已关闭
+2026-06-23 11:18:17,870 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:18:49,796 - INFO - 
+服务已关闭
+2026-06-23 11:18:50,380 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:24:13,601 - INFO - 
+服务已关闭
+2026-06-23 11:24:14,249 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:30:29,875 - INFO - 
+服务已关闭
+2026-06-23 11:30:30,578 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:35:28,110 - INFO - 
+服务已关闭
+2026-06-23 11:35:28,972 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:38:20,550 - INFO - 
+服务已关闭
+2026-06-23 11:38:20,976 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:39:32,191 - INFO - 
+服务已关闭
+2026-06-23 11:39:32,706 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 11:39:37,125 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:39:37,174 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:39:37,184 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:44:37,274 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:44:37,306 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:44:37,311 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:54:37,333 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:54:37,355 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 11:54:37,361 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 12:24:37,451 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 12:24:37,465 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:07:31,591 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:07:31,695 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:07:48,637 - INFO - 
+服务已关闭
+2026-06-23 20:08:05,592 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-23 20:08:28,774 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:08:28,912 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:08:29,280 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:38:29,649 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:38:29,872 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-23 20:38:29,874 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-24 13:21:52,000 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-24 13:21:56,979 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-24 13:21:57,147 - ERROR - Error handling request: 'HTTPHandler' object has no attribute 'raw_requestline'
+2026-06-24 13:23:51,808 - INFO - 
+服务已关闭
+2026-06-24 13:23:53,018 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 13:23:56,555 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 30787)
+2026-06-24 13:24:13,372 - WARNING - Route not found: /agent/task/receive?taskId=12314124131&name=joyes_GET
+2026-06-24 13:24:13,377 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 13:24:13,377 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 10453)
+2026-06-24 13:25:22,276 - INFO - 
+服务已关闭
+2026-06-24 13:25:22,854 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 13:25:23,099 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 4313)
+2026-06-24 13:25:33,540 - INFO - 
+服务已关闭
+2026-06-24 13:25:34,253 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 13:25:35,030 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 58101)
+2026-06-24 13:25:43,868 - WARNING - Route not found: /agent/task/receive?taskId=12314124131&name=joyes_GET
+2026-06-24 13:25:43,882 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 13:25:43,884 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 2026)
+2026-06-24 13:26:11,806 - INFO - 
+服务已关闭
+2026-06-24 13:26:12,325 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 13:26:12,344 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 59538)
+2026-06-24 13:26:48,349 - WARNING - Route not found: /agent/task/receive?taskId=12314124131&name=joyes_GET
+2026-06-24 13:26:48,349 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 13:26:48,352 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 13930)
+2026-06-24 14:04:09,012 - INFO - 
+服务已关闭
+2026-06-24 15:02:15,742 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:02:26,646 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 21530)
+2026-06-24 15:04:16,813 - WARNING - Route not found: /agent/task/receive?taskId=12314124131&name=joyes_GET
+2026-06-24 15:04:16,816 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:04:16,821 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 22396)
+2026-06-24 15:05:05,765 - INFO - 
+服务已关闭
+2026-06-24 15:05:06,528 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:05:07,051 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 26537)
+2026-06-24 15:05:11,696 - WARNING - Route not found: /agent/task/receive?taskId=12314124131&name=joyes_GET
+2026-06-24 15:05:11,698 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:05:11,700 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 26677)
+2026-06-24 15:05:31,525 - INFO - 
+服务已关闭
+2026-06-24 15:05:32,167 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:05:32,348 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 44106)
+2026-06-24 15:05:37,451 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:05:37,452 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:05:37,458 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 9718)
+2026-06-24 15:06:47,856 - INFO - 
+服务已关闭
+2026-06-24 15:07:00,165 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:07:00,206 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 53263)
+2026-06-24 15:07:04,570 - WARNING - route map {}
+2026-06-24 15:07:04,570 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:07:04,570 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:07:04,575 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 6172)
+2026-06-24 15:15:32,083 - INFO - 
+服务已关闭
+2026-06-24 15:15:33,043 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:15:33,211 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 42668)
+2026-06-24 15:15:39,451 - ERROR - Error handling request: get_route() missing 1 required positional argument: 'method'
+2026-06-24 15:15:39,510 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 52577)
+2026-06-24 15:17:08,788 - INFO - 
+服务已关闭
+2026-06-24 15:17:12,279 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:17:16,192 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 44178)
+2026-06-24 15:17:22,089 - ERROR - Error handling request: get_route() missing 1 required positional argument: 'method'
+2026-06-24 15:17:22,092 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 44585)
+2026-06-24 15:18:39,598 - INFO - 
+服务已关闭
+2026-06-24 15:18:40,387 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:18:40,420 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 2598)
+2026-06-24 15:18:42,451 - WARNING - route map []
+2026-06-24 15:18:42,451 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:18:42,453 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:18:42,460 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 52867)
+2026-06-24 15:19:06,370 - INFO - 
+服务已关闭
+2026-06-24 15:19:07,179 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:19:07,417 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 33716)
+2026-06-24 15:19:11,658 - WARNING - route map []
+2026-06-24 15:19:11,658 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:19:11,658 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:19:11,661 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 42311)
+2026-06-24 15:19:43,766 - INFO - 
+服务已关闭
+2026-06-24 15:19:44,486 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:19:44,555 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 40600)
+2026-06-24 15:19:46,660 - WARNING - route map []
+2026-06-24 15:19:46,660 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:19:46,661 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:19:46,666 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 55681)
+2026-06-24 15:20:58,250 - INFO - 
+服务已关闭
+2026-06-24 15:20:58,688 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:20:58,777 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 49227)
+2026-06-24 15:29:00,392 - INFO - 
+服务已关闭
+2026-06-24 15:29:01,703 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:29:02,245 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 12834)
+2026-06-24 15:29:04,763 - WARNING - route map ['/agent/task/receive_POST', '/_GET']
+2026-06-24 15:29:04,763 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:29:04,765 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:29:04,766 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 3200)
+2026-06-24 15:29:23,482 - WARNING - route map ['/agent/task/receive_POST', '/_GET']
+2026-06-24 15:29:23,482 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 15:29:23,484 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 15:29:23,486 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 1842)
+2026-06-24 15:29:35,671 - INFO - 
+服务已关闭
+2026-06-24 15:29:36,166 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 15:29:36,198 - INFO - 【线程并发服务】Path: /agent/task/receive?taskId=12314124131&name=joyes
+Client: ('127.0.0.1', 11495)
+2026-06-24 15:30:16,235 - INFO - 
+服务已关闭
+2026-06-24 23:25:44,122 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 23:26:59,520 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 51345)
+2026-06-24 23:31:49,167 - INFO - 
+服务已关闭
+2026-06-24 23:32:30,352 - INFO - 初始加载当前模块下的所有类
+2026-06-24 23:32:30,353 - INFO - 加载类 HTTPHandler
+2026-06-24 23:32:30,353 - INFO - 加载类 Log
+2026-06-24 23:32:30,354 - INFO - 加载类 HTTPServer
+2026-06-24 23:32:30,354 - INFO - 加载类 Api
+2026-06-24 23:32:30,354 - INFO - 加载类 HTTPClient
+2026-06-24 23:32:30,354 - INFO - 加载类 Route
+2026-06-24 23:32:30,379 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 23:32:31,587 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 2492)
+2026-06-24 23:32:41,223 - WARNING - route map []
+2026-06-24 23:32:41,224 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 23:32:41,229 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:32:41,231 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 43161)
+2026-06-24 23:32:44,223 - WARNING - route map []
+2026-06-24 23:32:44,224 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 23:32:44,224 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:32:44,241 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 26685)
+2026-06-24 23:33:29,113 - INFO - 
+服务已关闭
+2026-06-24 23:33:29,845 - INFO - 初始加载当前模块下的所有类
+2026-06-24 23:33:29,846 - INFO - 加载类 HTTPHandler
+2026-06-24 23:33:29,883 - INFO - 加载类 Log
+2026-06-24 23:33:29,884 - INFO - 加载类 HTTPServer
+2026-06-24 23:33:29,884 - INFO - 加载类 Api
+2026-06-24 23:33:29,884 - INFO - 加载类 HTTPClient
+2026-06-24 23:33:29,884 - INFO - 加载类 Route
+2026-06-24 23:33:29,908 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 23:33:29,944 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 26377)
+2026-06-24 23:33:34,700 - WARNING - route map ['/agent/task/receive_POST', '/_GET']
+2026-06-24 23:33:34,700 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 23:33:34,702 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:33:34,702 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 1034)
+2026-06-24 23:34:19,546 - WARNING - route map ['/agent/task/receive_POST', '/_GET']
+2026-06-24 23:34:19,547 - WARNING - Route not found: /agent/task/receive_GET
+2026-06-24 23:34:19,547 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:34:19,551 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 15494)
+2026-06-24 23:34:23,649 - INFO - 
+服务已关闭
+2026-06-24 23:34:24,151 - INFO - 初始加载当前模块下的所有类
+2026-06-24 23:34:24,152 - INFO - 加载类 HTTPHandler
+2026-06-24 23:34:24,157 - INFO - 加载类 Log
+2026-06-24 23:34:24,157 - INFO - 加载类 HTTPServer
+2026-06-24 23:34:24,157 - INFO - 加载类 Api
+2026-06-24 23:34:24,157 - INFO - 加载类 HTTPClient
+2026-06-24 23:34:24,157 - INFO - 加载类 Route
+2026-06-24 23:34:24,172 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 23:34:24,433 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 33439)
+2026-06-24 23:34:27,259 - INFO - 【接收任务】
+2026-06-24 23:34:27,260 - ERROR - Error in route /agent/task/receive_GET: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:34:27,260 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:34:27,262 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 31083)
+2026-06-24 23:35:17,038 - INFO - 【接收任务】
+2026-06-24 23:35:17,040 - ERROR - Error in route /agent/task/receive_GET: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:35:17,040 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:35:17,041 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 35238)
+2026-06-24 23:37:37,724 - INFO - 【接收任务】
+2026-06-24 23:37:37,728 - ERROR - Error in route /agent/task/receive_GET: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:37:37,728 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:37:37,733 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 54470)
+2026-06-24 23:41:31,265 - INFO - 
+服务已关闭
+2026-06-24 23:41:31,778 - INFO - 初始加载当前模块下的所有类
+2026-06-24 23:41:31,779 - INFO - 加载类 HTTPHandler
+2026-06-24 23:41:31,783 - INFO - 加载类 Log
+2026-06-24 23:41:31,784 - INFO - 加载类 HTTPServer
+2026-06-24 23:41:31,784 - INFO - 加载类 Api
+2026-06-24 23:41:31,784 - INFO - 加载类 HTTPClient
+2026-06-24 23:41:31,784 - INFO - 加载类 Route
+2026-06-24 23:41:31,812 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 23:41:32,579 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 23474)
+2026-06-24 23:41:34,996 - INFO - 【接收任务】
+2026-06-24 23:41:34,998 - ERROR - Error in route /agent/task/receive_GET: a bytes-like object is required, not 'str'
+2026-06-24 23:41:34,998 - ERROR - Error handling request: a bytes-like object is required, not 'str'
+2026-06-24 23:41:35,011 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 38931)
+2026-06-24 23:41:54,346 - INFO - 
+服务已关闭
+2026-06-24 23:41:54,680 - INFO - 初始加载当前模块下的所有类
+2026-06-24 23:41:54,680 - INFO - 加载类 HTTPHandler
+2026-06-24 23:41:54,681 - INFO - 加载类 Log
+2026-06-24 23:41:54,681 - INFO - 加载类 HTTPServer
+2026-06-24 23:41:54,681 - INFO - 加载类 Api
+2026-06-24 23:41:54,681 - INFO - 加载类 HTTPClient
+2026-06-24 23:41:54,681 - INFO - 加载类 Route
+2026-06-24 23:41:54,696 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-24 23:41:54,881 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 31109)
+2026-06-24 23:41:56,641 - INFO - 【接收任务】
+2026-06-24 23:41:56,643 - ERROR - Error in route /agent/task/receive_GET: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:41:56,643 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-24 23:41:56,644 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 9184)
+2026-06-25 01:37:43,713 - INFO - 
+服务已关闭
+2026-06-25 01:37:44,345 - INFO - 初始加载当前模块下的所有类
+2026-06-25 01:37:44,347 - INFO - 加载类 HTTPHandler
+2026-06-25 01:37:44,348 - INFO - 加载类 Log
+2026-06-25 01:37:44,349 - INFO - 加载类 HTTPServer
+2026-06-25 01:37:44,349 - INFO - 加载类 Api
+2026-06-25 01:37:44,349 - INFO - 加载类 HTTPClient
+2026-06-25 01:37:44,349 - INFO - 加载类 Route
+2026-06-25 01:37:44,364 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 01:37:44,536 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 17339)
+2026-06-25 01:37:50,208 - INFO - 【接收任务】
+2026-06-25 01:37:50,208 - ERROR - Error in route /agent/task/receive_GET: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 01:37:50,208 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 01:37:50,227 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 45890)
+2026-06-25 01:41:31,998 - INFO - 
+服务已关闭
+2026-06-25 01:41:32,464 - INFO - 初始加载当前模块下的所有类
+2026-06-25 01:41:32,464 - INFO - 加载类 HTTPHandler
+2026-06-25 01:41:32,465 - INFO - 加载类 Log
+2026-06-25 01:41:32,466 - INFO - 加载类 HTTPServer
+2026-06-25 01:41:32,466 - INFO - 加载类 Api
+2026-06-25 01:41:32,466 - INFO - 加载类 HTTPClient
+2026-06-25 01:41:32,466 - INFO - 加载类 Route
+2026-06-25 01:41:32,489 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 01:41:32,530 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 23366)
+2026-06-25 01:41:35,572 - INFO - 【接收任务】
+2026-06-25 01:41:35,573 - ERROR - Error writing response: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 01:41:35,664 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 33837)
+2026-06-25 01:42:00,973 - INFO - 【接收任务】
+2026-06-25 01:42:00,976 - ERROR - Error writing response: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 01:42:00,978 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 7666)
+2026-06-25 01:42:04,041 - INFO - 【接收任务】
+2026-06-25 01:42:04,043 - ERROR - Error writing response: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 01:42:04,045 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 38759)
+2026-06-25 01:42:10,980 - INFO - 【接收任务】
+2026-06-25 01:42:10,981 - ERROR - Error writing response: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 01:42:15,747 - INFO - 
+服务已关闭
+2026-06-25 01:42:16,888 - INFO - 初始加载当前模块下的所有类
+2026-06-25 01:42:16,888 - INFO - 加载类 HTTPHandler
+2026-06-25 01:42:16,890 - INFO - 加载类 Log
+2026-06-25 01:42:16,890 - INFO - 加载类 HTTPServer
+2026-06-25 01:42:16,890 - INFO - 加载类 Api
+2026-06-25 01:42:16,890 - INFO - 加载类 HTTPClient
+2026-06-25 01:42:16,890 - INFO - 加载类 Route
+2026-06-25 01:42:16,908 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 01:58:34,869 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 25295)
+2026-06-25 01:59:02,768 - ERROR - Error handling request: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2026-06-25 01:59:02,770 - ERROR - Error writing response: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2026-06-25 01:59:03,322 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 25305)
+2026-06-25 01:59:42,674 - ERROR - Error handling request: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2026-06-25 01:59:42,675 - ERROR - Error writing response: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2026-06-25 01:59:43,273 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 25320)
+2026-06-25 01:59:54,038 - ERROR - Error handling request: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2026-06-25 01:59:54,038 - ERROR - Error writing response: [WinError 10054] 远程主机强迫关闭了一个现有的连接。
+2026-06-25 02:00:10,070 - INFO - 
+服务已关闭
+2026-06-25 02:00:10,516 - INFO - 初始加载当前模块下的所有类
+2026-06-25 02:00:10,517 - INFO - 加载类 HTTPHandler
+2026-06-25 02:00:10,518 - INFO - 加载类 Log
+2026-06-25 02:00:10,519 - INFO - 加载类 HTTPServer
+2026-06-25 02:00:10,519 - INFO - 加载类 Api
+2026-06-25 02:00:10,519 - INFO - 加载类 HTTPClient
+2026-06-25 02:00:10,519 - INFO - 加载类 Route
+2026-06-25 02:00:10,532 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 02:00:43,141 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 44378)
+2026-06-25 02:02:08,155 - INFO - 【接收任务】
+2026-06-25 02:02:08,172 - ERROR - Error writing response: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 02:07:56,222 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 1357)
+2026-06-25 02:09:03,747 - INFO - 
+服务已关闭
+2026-06-25 02:09:04,843 - INFO - 初始加载当前模块下的所有类
+2026-06-25 02:09:04,843 - INFO - 加载类 HTTPHandler
+2026-06-25 02:09:04,852 - INFO - 加载类 Log
+2026-06-25 02:09:04,854 - INFO - 加载类 HTTPServer
+2026-06-25 02:09:04,854 - INFO - 加载类 Api
+2026-06-25 02:09:04,854 - INFO - 加载类 HTTPClient
+2026-06-25 02:09:04,855 - INFO - 加载类 Route
+2026-06-25 02:09:04,905 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 02:09:08,466 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 17888)
+2026-06-25 02:11:54,369 - INFO - 
+服务已关闭
+2026-06-25 02:11:54,804 - INFO - 初始加载当前模块下的所有类
+2026-06-25 02:11:54,804 - INFO - 加载类 HTTPHandler
+2026-06-25 02:11:54,804 - INFO - 加载类 Log
+2026-06-25 02:11:54,806 - INFO - 加载类 HTTPServer
+2026-06-25 02:11:54,806 - INFO - 加载类 Api
+2026-06-25 02:11:54,806 - INFO - 加载类 HTTPClient
+2026-06-25 02:11:54,806 - INFO - 加载类 Route
+2026-06-25 02:11:54,818 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 02:12:45,319 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 17971)
+2026-06-25 02:14:06,194 - INFO - 【接收任务】
+2026-06-25 02:14:06,210 - ERROR - Error writing response: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-25 02:14:07,826 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 14651)
+2026-06-25 02:15:57,766 - INFO - 
+服务已关闭
+2026-06-25 02:15:58,319 - INFO - 初始加载当前模块下的所有类
+2026-06-25 02:15:58,319 - INFO - 加载类 HTTPHandler
+2026-06-25 02:15:58,322 - INFO - 加载类 Log
+2026-06-25 02:15:58,322 - INFO - 加载类 HTTPServer
+2026-06-25 02:15:58,322 - INFO - 加载类 Api
+2026-06-25 02:15:58,322 - INFO - 加载类 HTTPClient
+2026-06-25 02:15:58,322 - INFO - 加载类 Route
+2026-06-25 02:15:58,340 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 02:16:04,809 - INFO - 【线程并发服务】Path: /agent/task/receive?taskid=12235423512341&taskname=joyes
+Client: ('127.0.0.1', 14697)
+2026-06-25 02:18:48,701 - INFO - 
+服务已关闭
+2026-06-25 12:06:20,979 - INFO - 初始加载当前模块下的所有类
+2026-06-25 12:06:20,980 - INFO - 加载类 HTTPHandler
+2026-06-25 12:06:20,982 - INFO - 加载类 Log
+2026-06-25 12:06:20,982 - INFO - 加载类 HTTPServer
+2026-06-25 12:06:20,982 - INFO - 加载类 Api
+2026-06-25 12:06:20,982 - INFO - 加载类 HTTPClient
+2026-06-25 12:06:20,983 - INFO - 加载类 Route
+2026-06-25 12:06:20,996 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 12:14:41,209 - INFO - 
+服务已关闭
+2026-06-25 12:18:02,509 - INFO - 初始加载当前模块下的所有类
+2026-06-25 12:18:02,509 - INFO - 加载类 HTTPHandler
+2026-06-25 12:18:02,510 - INFO - 加载类 Log
+2026-06-25 12:18:02,510 - INFO - 加载类 HTTPServer
+2026-06-25 12:18:02,510 - INFO - 加载类 Api
+2026-06-25 12:18:02,510 - INFO - 加载类 HTTPClient
+2026-06-25 12:18:02,510 - INFO - 加载类 Route
+2026-06-25 12:18:02,531 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 12:20:16,810 - INFO - 
+服务已关闭
+2026-06-25 12:20:18,729 - INFO - 初始加载当前模块下的所有类
+2026-06-25 12:20:18,730 - INFO - 加载类 HTTPHandler
+2026-06-25 12:20:18,731 - INFO - 加载类 Log
+2026-06-25 12:20:18,731 - INFO - 加载类 HTTPServer
+2026-06-25 12:20:18,731 - INFO - 加载类 Api
+2026-06-25 12:20:18,731 - INFO - 加载类 HTTPClient
+2026-06-25 12:20:18,731 - INFO - 加载类 Route
+2026-06-25 12:20:18,742 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 12:22:00,423 - INFO - 
+服务已关闭
+2026-06-25 12:27:32,647 - INFO - 初始加载当前模块下的所有类
+2026-06-25 12:27:32,647 - INFO - 加载类 HTTPHandler
+2026-06-25 12:27:32,648 - INFO - 加载类 Log
+2026-06-25 12:27:32,649 - INFO - 加载类 HTTPServer
+2026-06-25 12:27:32,649 - INFO - 加载类 Api
+2026-06-25 12:27:32,649 - INFO - 加载类 HTTPClient
+2026-06-25 12:27:32,649 - INFO - 加载类 Route
+2026-06-25 12:27:32,660 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 12:36:59,840 - INFO - 
+服务已关闭
+2026-06-25 12:37:22,946 - INFO - 初始加载当前模块下的所有类
+2026-06-25 12:37:22,946 - INFO - 加载类 HTTPHandler
+2026-06-25 12:37:22,947 - INFO - 加载类 Log
+2026-06-25 12:37:22,948 - INFO - 加载类 HTTPServer
+2026-06-25 12:37:22,948 - INFO - 加载类 Api
+2026-06-25 12:37:22,948 - INFO - 加载类 HTTPClient
+2026-06-25 12:37:22,948 - INFO - 加载类 Route
+2026-06-25 12:37:22,983 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-25 12:49:59,895 - INFO - 
+服务已关闭
+2026-06-26 00:04:25,541 - INFO - 初始加载当前模块下的所有类
+2026-06-26 00:04:25,541 - INFO - 加载类 HTTPHandler
+2026-06-26 00:04:25,543 - INFO - 加载类 Log
+2026-06-26 00:04:25,543 - INFO - 加载类 HTTPServer
+2026-06-26 00:04:25,543 - INFO - 加载类 Api
+2026-06-26 00:04:25,543 - INFO - 加载类 HTTPClient
+2026-06-26 00:04:25,544 - INFO - 加载类 Route
+2026-06-26 00:04:25,558 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-26 00:11:57,557 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 65367)
+2026-06-26 00:17:13,074 - INFO - 
+服务已关闭
+2026-06-26 00:17:13,514 - INFO - 初始加载当前模块下的所有类
+2026-06-26 00:17:13,514 - INFO - 加载类 HTTPHandler
+2026-06-26 00:17:13,517 - INFO - 加载类 Log
+2026-06-26 00:17:13,517 - INFO - 加载类 HTTPServer
+2026-06-26 00:17:13,517 - INFO - 加载类 Api
+2026-06-26 00:17:13,518 - INFO - 加载类 HTTPClient
+2026-06-26 00:17:13,518 - INFO - 加载类 Route
+2026-06-26 00:17:13,533 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-26 00:17:21,172 - INFO - 
+服务已关闭
+2026-06-26 00:17:21,531 - INFO - 初始加载当前模块下的所有类
+2026-06-26 00:17:21,531 - INFO - 加载类 HTTPHandler
+2026-06-26 00:17:21,532 - INFO - 加载类 Log
+2026-06-26 00:17:21,532 - INFO - 加载类 HTTPServer
+2026-06-26 00:17:21,532 - INFO - 加载类 Api
+2026-06-26 00:17:21,532 - INFO - 加载类 HTTPClient
+2026-06-26 00:17:21,532 - INFO - 加载类 Route
+2026-06-26 00:17:21,544 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-26 00:17:27,718 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 60245)
+2026-06-26 00:19:21,716 - INFO - 
+服务已关闭
+2026-06-26 00:19:22,157 - INFO - 初始加载当前模块下的所有类
+2026-06-26 00:19:22,158 - INFO - 加载类 HTTPHandler
+2026-06-26 00:19:22,159 - INFO - 加载类 Log
+2026-06-26 00:19:22,159 - INFO - 加载类 HTTPServer
+2026-06-26 00:19:22,159 - INFO - 加载类 Api
+2026-06-26 00:19:22,160 - INFO - 加载类 HTTPClient
+2026-06-26 00:19:22,160 - INFO - 加载类 Route
+2026-06-26 00:19:22,170 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-06-26 00:19:26,091 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 50508)
+2026-06-26 00:20:20,280 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:20:20,281 - INFO - 【接收任务】
+2026-06-26 00:20:20,281 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:20:20,282 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:20:21,863 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 50527)
+2026-06-26 00:25:44,242 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:25:44,242 - INFO - 【接收任务】
+2026-06-26 00:25:44,243 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:25:44,243 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:25:44,843 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 54468)
+2026-06-26 00:25:48,600 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:25:48,615 - INFO - 【接收任务】
+2026-06-26 00:25:48,615 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:25:48,616 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:25:49,663 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 54471)
+2026-06-26 00:26:00,553 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:26:00,554 - INFO - 【接收任务】
+2026-06-26 00:26:00,554 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:26:00,554 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:26:01,998 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 54477)
+2026-06-26 00:26:53,358 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:26:53,358 - INFO - 【接收任务】
+2026-06-26 00:26:53,358 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:26:53,359 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:26:59,552 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 54485)
+2026-06-26 00:30:21,088 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:30:21,089 - INFO - 【接收任务】
+2026-06-26 00:30:21,089 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:30:21,089 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:30:21,680 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 54593)
+2026-06-26 00:30:21,834 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:30:21,835 - INFO - 【接收任务】
+2026-06-26 00:30:21,835 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:30:21,835 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:30:23,316 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 54595)
+2026-06-26 00:35:17,837 - INFO - 匹配到接口处理函数receive_task /agent/task/receive_POST
+2026-06-26 00:35:17,837 - INFO - 【接收任务】
+2026-06-26 00:35:17,837 - ERROR - Error in route /agent/task/receive_POST: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:35:17,837 - ERROR - Error handling request: [WinError 10053] 你的主机中的软件中止了一个已建立的连接。
+2026-06-26 00:35:18,929 - INFO - 【线程并发服务】Path: /agent/task/receive
+Client: ('127.0.0.1', 52440)
+2026-06-26 00:35:59,212 - INFO - 
+服务已关闭
