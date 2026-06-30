@@ -12,16 +12,14 @@
 # 混合多线程能力 + HTTP服务基类 = 并发服务
 import json
 import logging
+import os
+import shutil
 import sys
 import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 
 
-
-# 启动前加载当前模块下的所有类
-
-# 创建本地日志类Log， 同事输出日志到文件和控制台
 class Log:
     def __init__(self, log_file="log.txt"):
         self.log_file = log_file
@@ -61,16 +59,6 @@ log = Log()
 uri_map = {}
 
 
-# 初始化加载所有路由， 读取当前模块下的所有使用 @route 装饰器注册的路由函数，
-# 并将它们添加到 uri_map 中
-def load_routes():
-    for func in globals().values():
-        if hasattr(func, 'uri') and hasattr(func, 'method'):
-            uri_map[f'{func.uri}_{func.method}'] = func
-    """加载所有路由"""
-
-load_routes()
-
 def route(uris, methods):
     """路由注册装饰器"""
     def wrapper(func):
@@ -83,15 +71,109 @@ def route(uris, methods):
         return func
     return wrapper
 
-def get_route(uri, method):
-    """获取路由处理函数"""
-    return uri_map.get(f'{uri}_{method}')
 
-def list_routes():
-    """列出所有已注册的路由"""
-    return list(uri_map.keys())
+class GitRepository:
+    '''
+    Git仓库工具类：根据给出的仓库URL、用户名和密码，下载仓库代码到临时目录，并提供获取仓库本地路径和删除临时仓库的方法
+    '''
+
+    def __init__(self, repo_url, user, password):
+        '''
+        初始化Git仓库工具类
+        :param repo_url: 仓库URL或仓库名称（如：https://github.com/user/repo 或 repo_name）
+        :param user: GitHub用户名
+        :param password: GitHub密码或访问令牌
+        '''
+        self.repo_url = repo_url
+        self.user = user
+        self.password = password
+        # 提取仓库名称
+        self.repo_name = self._extract_repo_name(repo_url)
+        # 构建带有认证的仓库URL
+        self.auth_url = f"https://{user}:{password}@github.com/{user}/{self.repo_name}.git"
+        # 临时目录路径
+        self.temp_dir = os.path.join("tmp", self.repo_name)
+
+    def _extract_repo_name(self, repo_url):
+        '''
+        从仓库URL中提取仓库名称
+        :param repo_url: 仓库URL或仓库名
+        :return: 仓库名称
+        '''
+        if repo_url.startswith("https://") or repo_url.startswith("git@"):
+            # 移除 .git 后缀
+            if repo_url.endswith(".git"):
+                repo_url = repo_url[:-4]
+            # 提取最后一部分作为仓库名
+            parts = repo_url.split("/")
+            return parts[-1]
+        # 如果已经是仓库名，直接返回
+        return repo_url
+
+    def clone(self):
+        '''
+        克隆仓库代码到临时目录
+        :return: 仓库本地路径，如果克隆失败返回 None
+        '''
+        try:
+            # 如果临时目录已存在，先删除
+            if os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
+
+            # 创建临时目录的父目录
+            os.makedirs(os.path.dirname(self.temp_dir) or ".", exist_ok=True)
+
+            # 执行 git clone 命令
+            result = subprocess.run(
+                ["git", "clone", self.auth_url, self.temp_dir],
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+
+            if result.returncode == 0:
+                log.info(f"仓库克隆成功: {self.temp_dir}")
+                return self.temp_dir
+            else:
+                log.error(f"仓库克隆失败: {result.stderr}")
+                return None
+        except Exception as e:
+            log.error(f"克隆仓库时发生异常: {str(e)}")
+            return None
+
+    def get_local_path(self):
+        '''
+        获取仓库本地路径
+        :return: 仓库本地绝对路径，如果目录不存在返回 None
+        '''
+        if os.path.exists(self.temp_dir):
+            return os.path.abspath(self.temp_dir)
+        else:
+            log.warning(f"仓库本地路径不存在: {self.temp_dir}")
+            return None
+
+    def delete_temp_repo(self):
+        '''
+        删除临时仓库目录
+        :return: 删除成功返回 True，失败返回 False
+        '''
+        try:
+            if os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
+                log.info(f"临时仓库已删除: {self.temp_dir}")
+                return True
+            else:
+                log.warning(f"临时仓库目录不存在: {self.temp_dir}")
+                return True
+        except Exception as e:
+            log.error(f"删除临时仓库失败: {str(e)}")
+            return False
+
 
 class Api:
+    '''
+    接口类
+    '''
     @staticmethod
     @route("/agent/task/receive", "GET,POST")
     def receive_task(httpReq):
@@ -104,6 +186,12 @@ class Api:
         msg = f"【线程并发服务】Path: {httpReq.path}\nClient: {httpReq.client_address}"
         log.info(msg)
         httpReq.Result(200, "success")
+
+    @staticmethod
+    @route("/agent/task/query", "GET")
+    def query_task(httpReq):
+        log.info(f"【查询任务】{httpReq.qry}")
+        httpReq.Result(200, "OK")
 
 
 class MyHandler(BaseHTTPRequestHandler):
@@ -165,7 +253,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 post_body = self.rfile.read(int(self.headers["Content-Length"])).decode("utf-8")
                 self.post_body = self.str2json(post_body)
                 log.info(f"【请求体】{self.post_body}")
-            func = get_route(self.uri,self.command)
+            func = uri_map.get(f'{self.uri}_{self.command}')
             if func:
                 log.info(f"匹配到接口处理函数{func.__name__} {func.uri}_{func.method}")
                 try:
@@ -174,7 +262,6 @@ class MyHandler(BaseHTTPRequestHandler):
                     log.error(f"Error in route {func.uri}_{func.method}: {e}")
                     self.Result(500, str(e))
             else:
-                log.warning(f"route map {list_routes()}")
                 log.warning(f"Route not found: {self.uri}_{self.command}")
                 self.Result(404, "Not Found")
         except Exception as e:
