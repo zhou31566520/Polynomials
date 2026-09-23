@@ -1,0 +1,41 @@
+# ============================================================
+# P2P 信令服务器镜像
+# 单文件 + 标准库，无 pip 依赖，多阶段仅为最小化镜像
+# ============================================================
+
+# ---- 阶段 1：builder（纯净拷贝，无缓存层）----
+FROM python:3.13-slim AS builder
+WORKDIR /build
+COPY p2pserver.py .
+
+# ---- 阶段 2：运行时（仅拷贝 .py 文件，无其他噪音）----
+FROM python:3.13-slim
+
+# 时区 + Python 运行时优化
+ENV TZ=Asia/Shanghai \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# 安装 tzdata 设置时区（~1MB）
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tzdata ca-certificates \
+ && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+ && echo $TZ > /etc/timezone \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 从 builder 拷贝产物（避免 COPY 指令带额外层级）
+COPY --from=builder /build/p2pserver.py /app/p2pserver.py
+
+# 信令服务器端口
+EXPOSE 8888
+
+# 健康检查：每 30s 请求节点列表接口
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=5s \
+    CMD python -c "from urllib import request; request.urlopen('http://127.0.0.1:8888/p2p/peers', timeout=3)" \
+    || exit 1
+
+# 启动命令：端口可通过环境变量 PORT 覆盖
+CMD ["sh", "-c", "python -u p2pserver.py ${PORT:-8888}"]

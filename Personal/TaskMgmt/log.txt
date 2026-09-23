@@ -1,0 +1,39 @@
+2026-07-09 00:23:06,986 - INFO - 【执行】show tables None
+2026-07-09 00:24:29,037 - INFO - 【执行】show tables None
+2026-07-09 00:26:04,235 - INFO - 【执行】show tables None
+2026-07-09 00:26:17,302 - INFO - 【执行】show tables None
+2026-07-09 00:26:27,779 - INFO - 【执行】create table if not exists task (id integer primary key autoincrement, name text, status text, create_time text, update_time text) None
+2026-07-09 00:27:34,204 - INFO - 【执行】create table if not exists task (id integer primary key autoincrement, name text, status text, create_time text, update_time text) ()
+2026-07-09 00:27:34,211 - INFO - 【查询结果】[]
+2026-07-09 00:27:34,211 - INFO - 【执行】select * from task  ()
+2026-07-09 00:27:34,211 - INFO - 【查询结果】[]
+2026-07-09 00:27:58,586 - INFO - 【执行】create table if not exists task (id integer primary key autoincrement, name text, status text, create_time text, update_time text) ()
+2026-07-09 00:27:58,587 - INFO - 【查询结果】[]
+2026-07-09 00:27:58,587 - INFO - 【执行】select * from task  ()
+2026-07-09 00:27:58,587 - INFO - 【查询结果】[]
+2026-07-09 00:28:22,691 - INFO - 【执行】create table if not exists task (id integer primary key autoincrement, name text, status text, create_time text, update_time text) ()
+2026-07-09 00:28:22,692 - INFO - 【查询结果】[]
+2026-07-09 00:28:22,693 - INFO - 【执行】select * from task  ()
+2026-07-09 00:28:22,693 - INFO - 【查询结果】[]
+2026-07-09 00:28:22,693 - INFO - 【执行】show tables ()
+2026-07-09 00:29:04,534 - INFO - 【执行】create table if not exists task (id integer primary key autoincrement, name text, status text, create_time text, update_time text) ()
+2026-07-09 00:29:04,534 - INFO - 【查询结果】[]
+2026-07-09 00:29:04,535 - INFO - 【执行】select * from task  ()
+2026-07-09 00:29:04,535 - INFO - 【查询结果】[]
+2026-07-09 00:29:04,535 - INFO - 【执行】select name from sqlite_master where type='table' ()
+2026-07-09 00:29:04,535 - INFO - 【查询结果】[('task',), ('sqlite_sequence',)]
+2026-07-12 23:08:14,183 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-07-12 23:09:59,293 - INFO - 【请求体】{'ip': '127.0.0.1', 'port': 8081, 'name': '127.0.0.1:8081'}
+2026-07-12 23:09:59,293 - WARNING - Route not found: /task/mgmt/register_POST
+2026-07-12 23:09:59,293 - INFO - 接口响应 Not Found
+2026-07-12 23:14:44,801 - INFO - 
+服务已关闭
+2026-07-12 23:14:45,194 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-07-12 23:15:03,078 - INFO - 【请求体】{'ip': '127.0.0.1', 'port': 8081, 'name': '127.0.0.1:8081'}
+2026-07-12 23:15:03,079 - WARNING - Route not found: /task/mgmt/register_POST
+2026-07-12 23:15:03,079 - INFO - 接口响应 Not Found
+2026-07-12 23:22:22,449 - INFO - 
+服务已关闭
+2026-07-12 23:22:22,758 - INFO - 并发HTTP服务启动：http://127.0.0.1:8080
+2026-07-13 13:27:10,547 - INFO - 
+服务已关闭

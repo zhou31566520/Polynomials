@@ -1,0 +1,24 @@
+F:/华为家庭存储/workspace/mygit/Personal/.dockerignore
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 日志 & 下载
+*.log
+log.txt
+downloads/
+TaskMgmt/task_mgmt.sqlite3
+
+# 只保留 P2P 源码
+!P2P/*.py
+!P2P/Dockerfile*

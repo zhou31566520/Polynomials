@@ -1,0 +1,40 @@
+# ============================================================
+# P2P 客户端镜像
+# 单文件 + 标准库，无 pip 依赖
+# ============================================================
+
+FROM python:3.13-slim AS builder
+WORKDIR /build
+COPY p2pclient.py .
+
+# ---- 运行时 ----
+FROM python:3.13-slim
+
+ENV TZ=Asia/Shanghai \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends tzdata ca-certificates \
+ && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+ && echo $TZ > /etc/timezone \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /build/p2pclient.py /app/p2pclient.py
+
+# 创建下载目录（客户端自动 os.makedirs，但提前建好方便 chmod）
+RUN mkdir -p /app/downloads && chmod 755 /app/downloads
+
+# P2P TCP 监听端口
+EXPOSE 9000
+
+# 下载卷（外部持久化收到的文件）
+VOLUME ["/app/downloads"]
+
+# 启动参数通过环境变量覆盖：
+#   NODE_NAME      节点名称（默认 p2p-node）
+#   P2P_PORT       本机 P2P 端口（默认 9000）
+#   SIGNAL_SERVER  信令服务器 URL，如 http://p2p-server:8888
+CMD ["sh", "-c", "python -u p2pclient.py ${NODE_NAME:-p2p-node} ${P2P_PORT:-9000}"]
