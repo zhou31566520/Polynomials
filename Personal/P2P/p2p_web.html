@@ -1105,7 +1105,21 @@
 
     // ==================== 注册 / 登录 ====================
 
-    const API_BASE = "http://192.168.137.198:8890";   // ★ 改成本机 API 地址
+    /**
+     * 根据选中的 WebSocket 信令地址动态推导 HTTP API 地址
+     * 规则：ws://ip:PORT → http://ip:(PORT+1)  (服务端 WS_PORT + 1 = HTTP_API_PORT)
+     */
+    function getApiBase() {
+        const wsSel = document.getElementById("wsUrl");
+        const wsUrl = wsSel ? wsSel.value : "ws://127.0.0.1:8889";
+        try {
+            const u = new URL(wsUrl);
+            const port = (parseInt(u.port || "8889", 10) + 1);
+            return `http://${u.hostname}:${port}`;
+        } catch (e) {
+            return "http://127.0.0.1:8890";
+        }
+    }
 
     let authMode = "login";
 
@@ -1137,7 +1151,7 @@
                     msgEl.textContent = "用户名至少 3 位";
                     return;
                 }
-                url = `${API_BASE}/api/register`;
+                url = `${getApiBase()}/api/register`;
                 body = {username, nickname, password};
             } else {
                 username = document.getElementById("regUsername")?.value.trim() || document.getElementById("regNickname")?.value.trim() || "";
@@ -1150,7 +1164,7 @@
                 }
                 if (!nickname && authMode === "login") { /* 昵称框隐藏也拿不到 */
                 }
-                url = `${API_BASE}/api/login`;
+                url = `${getApiBase()}/api/login`;
                 body = {username, password};
             }
 
