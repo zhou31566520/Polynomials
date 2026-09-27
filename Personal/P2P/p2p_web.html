@@ -677,7 +677,6 @@
                 state.myPeerId = msg.peer_id;
                 log("✅ 注册成功 peer_id=", msg.peer_id);
                 setStatus(true, `已连接 ${msg.peer_id}`);
-                logSys(`✅ 已注册: ${msg.name} (${msg.peer_id})`);
                 break;
             }
             case "peers": {
@@ -830,7 +829,6 @@
         conn.onconnectionstatechange = () => {
             const st = conn.connectionState;
             log("  🔗 connectionState →", st);
-            logSys(`🔗 ${peerId.slice(0, 6)} 状态: ${st}`);
             if (state.activeTab === peerId) {
                 setConnBadge(peerId, st === "connected" ? "connected" : "connecting");
             }
@@ -925,7 +923,6 @@
             }
         });
         if (newlyAdded.length > 0) {
-            logSys(`🌐 gossip 发现 ${newlyAdded.length} 个新 peer，正在自动连接...`);
             renderPeerList();
         }
         return newlyAdded;
@@ -934,12 +931,10 @@
     function setupDataChannel(dc, peerId) {
         dc.onopen = () => {
             log("  🌟 DataChannel OPEN peer=", peerId.slice(0, 6));
-            logSys(`✅ 与 ${peerId.slice(0, 6)} 的 P2P 连接已建立 🎉`);
             if (state.activeTab === peerId) setConnBadge(peerId, "connected");
         };
         dc.onclose = () => {
             log("  ⚠️ DataChannel CLOSE peer=", peerId.slice(0, 6));
-            logSys(`⚠️ 与 ${peerId.slice(0, 6)} 连接断开`);
             state.dataChannels.delete(peerId);
             if (state.activeTab === peerId) setConnBadge(peerId, "idle");
         };
