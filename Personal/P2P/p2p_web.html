@@ -406,22 +406,16 @@
     </div>
 </div>
 <div class="toolbar">
-    <label>我的名字:</label>
-    <input id="myName" value="web-user" style="width:120px" readonly>
-    <label>信令WS:</label>
-    <select id="wsUrl" style="width:220px;padding:4px 6px;border:1px solid #d1d5db;border-radius:6px;background:#fff">
-        <option value="ws://192.168.137.12:8889">本地 192.168.137.12:8889</option>
-        <option value="ws://127.0.0.1:8889">本机 127.0.0.1:8889</option>
-        <option value="ws://192.168.137.198:8889">局域网 192.168.137.198:8889</option>
-        <option value="ws://0.0.0.0:8889">通配 0.0.0.0:8889</option>
+    <span class="dot" id="onlineDot" style="background:#9ca3af;"></span>
+    <span id="myNameDisplay" style="font-size:14px;font-weight:600;color:#1f2937;">未登录</span>
+    <button id="btnLogin" onclick="showAuthModal('login')" style="margin-left:auto;padding:6px 18px;border:1px solid #3b82f6;background:#fff;color:#3b82f6;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">登录</button>
+    <button id="btnLogout" onclick="logout()" style="margin-left:auto;padding:6px 18px;border:1px solid #ef4444;background:#fff;color:#ef4444;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;display:none;">登出</button>
+    <!-- 隐藏的保留项: JS 还需要读 wsUrl 和 myName -->
+    <input id="myName" value="" style="display:none">
+    <select id="wsUrl" style="display:none">
+        <option id="wsAuto" value=""></option>
     </select>
-    <button id="btnConnect" class="btn-primary">连接</button>
-    <button id="btnDisconnect" class="btn-danger" style="display:none">断开</button>
-\1    <button id="btnLogin" onclick="showAuthModal('login')" style="padding:6px 14px;border:1px solid #3b82f6;background:#fff;color:#3b82f6;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">登录</button>
-    <button id="btnLogout" onclick="logout()" style="padding:6px 14px;border:1px solid #ef4444;background:#fff;color:#ef4444;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;display:none;">登出</button>
-    <span id="status" class="status"><span class="dot"></span>未连接</span>
 </div>
-
 <div class="main">
     <div class="left">
         <h3>在线成员 (<span id="peerCount">0</span>)</h3>
@@ -495,9 +489,15 @@
 
     // ==================== UI 初始化 ====================
     document.addEventListener("DOMContentLoaded", () => {
+        // 自动推导 WebSocket 地址 (和 HTTP API 同主机, WS=8889, API=8890)
+        const wsAuto = document.getElementById("wsAuto");
+        if (wsAuto) {
+            const host = location.hostname || "127.0.0.1";
+            wsAuto.value = "ws://" + host + ":8889";
+        }
+
         state.messages.set("__public__", []);
-        document.getElementById("btnConnect").onclick = doConnect;
-        document.getElementById("btnDisconnect").onclick = doDisconnect;
+        // btnConnect/btnDisconnect 已移除, 登录/登出按钮在 toolbar 右侧
         document.getElementById("sendBtn").onclick = sendCurrent;
         document.getElementById("fileBtn").onclick = () => document.getElementById("fileInput").click();
         document.getElementById("fileInput").onchange = handleFileSelect;
@@ -516,6 +516,7 @@
         // ✅ 页面加载：只切换登录/登出按钮，不自动弹登录框
         if (state.token && state.nickname) {
             document.getElementById("myName").value = state.nickname;
+            document.getElementById("myNameDisplay").textContent = state.nickname;
             document.getElementById("btnLogin").style.display = "none";
             document.getElementById("btnLogout").style.display = "";
             log("💾 检测到本地登录状态，自动连接...");
@@ -560,14 +561,20 @@
     });
 
     function setStatus(connected, text) {
-        const el = document.getElementById("status");
-        el.className = "status" + (connected ? " connected" : "");
-        el.innerHTML = `<span class="dot"></span>${text || (connected ? "已连接" : "未连接")}`;
-        document.getElementById("btnConnect").style.display = connected ? "none" : "";
-        document.getElementById("btnDisconnect").style.display = connected ? "" : "none";
-        // 同步登录/登出按钮
-        document.getElementById("btnLogin").style.display = (state.token ? "none" : "");
-        document.getElementById("btnLogout").style.display = (state.token ? "" : "none");
+        // 更新小圆点颜色: 灰(离线) / 绿(在线) / 红(异常)
+        const dot = document.getElementById("onlineDot");
+        if (dot) {
+            if (connected) {
+                dot.style.background = "#22c55e";
+                dot.style.boxShadow = "0 0 6px #22c55e";
+            } else if (text && text.includes("断开")) {
+                dot.style.background = "#ef4444";
+                dot.style.boxShadow = "none";
+            } else {
+                dot.style.background = "#9ca3af";
+                dot.style.boxShadow = "none";
+            }
+        }
     }
 
     function setConnBadge(peerId, status) {
@@ -748,6 +755,7 @@
                     // 不关 P2P DataChannel！已经建立好的连接继续工作
                     document.getElementById("btnLogin").style.display = "";
                     document.getElementById("btnLogout").style.display = "none";
+                    document.getElementById("myNameDisplay").textContent = "未登录";
                     showAuthModal("login");
                     document.getElementById("authMsg").textContent = "登录已过期，请重新登录";
                     document.getElementById("authMsg").style.color = "#f59e0b";
@@ -1366,6 +1374,7 @@
 
             // 自动把昵称填到连接框里，然后触发连接
             document.getElementById("myName").value = state.nickname;
+            document.getElementById("myNameDisplay").textContent = state.nickname;
             doConnect();
 
         } catch (e) {
@@ -1384,6 +1393,7 @@
         doDisconnect();
         document.getElementById("btnLogin").style.display = "";
         document.getElementById("btnLogout").style.display = "none";
+        document.getElementById("myNameDisplay").textContent = "未登录";
         showAuthModal("login");
     }
 
