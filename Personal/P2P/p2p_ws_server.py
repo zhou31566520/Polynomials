@@ -1,479 +1,410 @@
 #!/usr/bin/env python3
 """
-P2P WebSocket 信令服务器 —— 给浏览器 WebRTC 客户端用
-功能: 只转发 SDP offer/answer 和 ICE candidates，不转发业务消息
-依赖: 仅 Python 标准库（socket / threading / hashlib / base64 / json）
-启动: python p2p_ws_server.py  (默认监听 0.0.0.0:8889)
+P2P WebRTC 信令服务器（WebSocket）
+=========================
+新增：注册 / 登录 / Token 校验
+- SQLite 存储用户（用户名、昵称唯一）
+- password = sha256(sha256(pwd) + salt)
+- token = 32 位随机 hex，内存中映射到 peer_id
 """
 
-import socket
-import threading
+import asyncio
 import hashlib
-import base64
 import json
+import os
+import secrets
+import sqlite3
 import time
 import uuid
-import sys
-import os
+import threading
+import logging
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import socketserver
 
-# ============ 配置 ============
-WS_HOST = "0.0.0.0"
+# ==================== 配置 ====================
+HOST = "0.0.0.0"
 WS_PORT = 8889
-HEARTBEAT_TIMEOUT = 30   # 秒
-HEARTBEAT_INTERVAL = 10   # 客户端心跳间隔（服务器检查用）
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+os.makedirs(DATA_DIR, exist_ok=True)   # ★ 确保目录存在
+DB_PATH = os.path.join(DATA_DIR, "p2p_users.db")
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+log = logging.getLogger("p2p-ws-server")
 
-# ============ 日志 ============
-class Log:
-    def __init__(self, f="log_ws.txt"):
-        self.f = f
-        self._l = __import__("logging").getLogger("ws-server")
-        self._l.setLevel(__import__("logging").INFO)
-        if not self._l.handlers:
-            fmt = __import__("logging").Formatter(
-                "%(asctime)s - %(levelname)s - %(message)s"
+# ==================== 持久化：SQLite ====================
+
+_db_lock = threading.Lock()
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    # ★ 不用 WAL（Docker 单文件挂载场景 WAL 的 -wal/-shm 会丢 → DB 损坏）
+    # 默认 DELETE 模式 + synchronous NORMAL，单机足够安全
+    conn.execute("PRAGMA journal_mode=DELETE")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA foreign_keys=ON")
+    return conn
+
+def init_db():
+    with _db_lock, get_db() as conn:
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS users (
+                peer_id      TEXT PRIMARY KEY,
+                username     TEXT UNIQUE NOT NULL,
+                nickname     TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                salt         TEXT NOT NULL,
+                created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+            CREATE INDEX IF NOT EXISTS idx_users_nickname ON users(nickname);
+        """)
+
+def hash_password(password: str, salt: str = None) -> tuple:
+    """返回 (hash, salt)，salt 64 位 hex"""
+    if salt is None:
+        salt = secrets.token_hex(16)   # 32 字节盐
+    h = hashlib.sha256((password + salt).encode()).hexdigest()
+    h = hashlib.sha256((h + salt).encode()).hexdigest()  # 二次迭代防彩虹表
+    return h, salt
+
+def verify_password(password: str, stored_hash: str, salt: str) -> bool:
+    h, _ = hash_password(password, salt)
+    return h == stored_hash
+
+def register_user(username: str, nickname: str, password: str) -> tuple:
+    """返回 (ok, peer_id_or_msg)"""
+    username = username.strip()
+    nickname = nickname.strip()
+    password = password.strip()
+
+    if not username or len(username) < 3:
+        return False, "用户名至少 3 位"
+    if not nickname or len(nickname) < 2:
+        return False, "昵称至少 2 位"
+    if not password or len(password) < 4:
+        return False, "密码至少 4 位"
+
+    with _db_lock:
+        conn = get_db()
+        try:
+            # 用户名重复？
+            if conn.execute("SELECT 1 FROM users WHERE username=?", (username,)).fetchone():
+                return False, "用户名已被占用"
+            # 昵称重复？
+            if conn.execute("SELECT 1 FROM users WHERE nickname=?", (nickname,)).fetchone():
+                return False, "昵称已被占用"
+            peer_id = uuid.uuid4().hex   # 32 位
+            pwd_hash, salt = hash_password(password)
+            conn.execute(
+                "INSERT INTO users(peer_id, username, nickname, password_hash, salt) VALUES (?,?,?,?,?)",
+                (peer_id, username, nickname, pwd_hash, salt),
             )
-            fh = __import__("logging").FileHandler(f, encoding="utf-8")
-            sh = __import__("logging").StreamHandler(sys.stdout)
-            fh.setFormatter(fmt); sh.setFormatter(fmt)
-            self._l.addHandler(fh); self._l.addHandler(sh)
-            self._l.propagate = False
-    def info(self, m):   self._l.info(m)
-    def warn(self, m):   self._l.warning(m)
-    def error(self, m):  self._l.error(m)
+            conn.commit()
+            return True, peer_id
+        except Exception as e:
+            return False, f"注册失败: {e}"
+        finally:
+            conn.close()
 
-log = Log()
+def authenticate_user(username: str, password: str) -> tuple:
+    """返回 (ok, peer_id_or_msg, nickname)"""
+    username = username.strip()
+    if not username or not password:
+        return False, "请输入用户名和密码", ""
+    with _db_lock:
+        conn = get_db()
+        try:
+            row = conn.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
+            if not row:
+                return False, "用户名或密码错误", ""
+            if not verify_password(password, row["password_hash"], row["salt"]):
+                return False, "用户名或密码错误", ""
+            return True, row["peer_id"], row["nickname"]
+        finally:
+            conn.close()
 
+# ==================== 内存状态 ====================
 
-# ============ WebSocket 协议 (RFC 6455) ============
+clients = {}       # peer_id -> {"nickname", "ws", "address", "last_ping"}
+reverse_peers = {} # ws -> peer_id
+tokens = {}        # token -> peer_id
 
-WS_OPCODES = {
-    0x1: "text",   0x2: "binary",
-    0x8: "close",  0x9: "ping",  0xA: "pong",
-}
+HEARTBEAT_TIMEOUT = 30   # 秒
 
+def gen_token() -> str:
+    return secrets.token_hex(16)   # 32 位
 
-def ws_handshake(conn):
-    """完成 WebSocket 握手 —— 返回 True 表示成功"""
-    import select
+def cleanup_client(peer_id: str, reason: str = ""):
+    info = clients.pop(peer_id, None)
+    if info and info.get("ws") in reverse_peers:
+        reverse_peers.pop(info["ws"], None)
+    for t, pid in list(tokens.items()):
+        if pid == peer_id:
+            tokens.pop(t, None)
+    if info:
+        log.info(f"清理客户端 {peer_id[:6]} ({info.get('nickname')}) reason={reason}")
 
-    # 设置短超时快速判断是不是 HTTP 请求（健康检查的裸 TCP 会在这里快速返回）
-    try:
-        conn.settimeout(3.0)
-    except Exception:
-        pass
+# ==================== HTTP 层：注册 + 登录 ====================
 
-    # 读 HTTP upgrade 请求
-    data = b""
-    try:
-        while b"\r\n\r\n" not in data:
-            chunk = conn.recv(4096)
-            if not chunk:
-                log.warn(f"握手: 连接关闭（未收到数据），前 {len(data)} 字节: {data[:80]}")
-                return False
-            data += chunk
-            if len(data) > 8192:
-                log.warn("握手: HTTP 头过大")
-                return False
-    except socket.timeout:
-        log.warn(f"握手: 3秒内没收到 HTTP 请求（可能是健康检查探测），已收到 {len(data)} 字节")
-        return False
+class HTTPHandler(BaseHTTPRequestHandler):
+    def log_message(self, fmt, *args):
+        log.info("HTTP %s - %s", self.address_string(), fmt % args)
 
-    text = data.decode("utf-8", errors="replace")
-    # 只打印前两行（方法 + Host），不泄露 Key
-    # ★ dump 全部 HTTP 头
-    log.info(f"握手: ====== 完整 HTTP 请求 =====")
-    for line in text.split("\r\n")[:20]:
-        if "sec-websocket-key" in line.lower():
-            k = line.split(":", 1)[1].strip()
-            log.info(f"  {line.split(':', 1)[0]}: {k[:8]}...")
+    def _send_json(self, code: int, obj: dict):
+        body = json.dumps(obj, ensure_ascii=False).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_OPTIONS(self):
+        self._send_json(200, {})
+
+    def do_GET(self):
+        # 健康检查
+        if self.path in ("/", "/health", "/ping"):
+            self._send_json(200, {"status": "ok", "clients": len(clients)})
+            return
+        self._send_json(404, {"error": "not found"})
+
+    def do_POST(self):
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+            raw = self.rfile.read(length) if length else b"{}"
+            data = json.loads(raw.decode()) if raw else {}
+        except Exception:
+            self._send_json(400, {"error": "请求格式错误"})
+            return
+
+        path = self.path.split("?")[0]
+
+        if path == "/api/register":
+            ok, result = register_user(data.get("username",""), data.get("nickname",""), data.get("password",""))
+            if ok:
+                # 注册成功自动发一个登录 token（让前端无需再单独登录）
+                token = gen_token()
+                tokens[token] = result   # result 就是 peer_id
+                self._send_json(200, {"ok": True, "peer_id": result, "token": token})
+            else:
+                self._send_json(400, {"ok": False, "error": result})
+
+        elif path == "/api/login":
+            ok, peer_id, nickname = authenticate_user(data.get("username",""), data.get("password",""))
+            if ok:
+                token = gen_token()
+                tokens[token] = peer_id
+                self._send_json(200, {"ok": True, "peer_id": peer_id, "nickname": nickname, "token": token})
+            else:
+                self._send_json(401, {"ok": False, "error": peer_id})
+
         else:
-            log.info(f"  {line}")
-    log.info(f"握手: =========================")
-    if "upgrade: websocket" not in text.lower():
-        log.warn(f"握手: 缺少 Upgrade: websocket 头")
-        return False
+            self._send_json(404, {"error": "not found"})
 
-    # 提取 Sec-WebSocket-Key
-    key = None
+# ==================== WebSocket 层：信令转发 ====================
+
+async def ws_handler(reader, writer):
+    address = writer.get_extra_info("peername")
+    log.info(f"【新连接】来自 {address}")
+
+    peer_id = None
+    try:
+        # ---- 握手 ----
+        http_lines = []
+        while True:
+            line = await asyncio.wait_for(reader.readline(), timeout=5.0)
+            if not line: return
+            http_lines.append(line)
+            if line in (b"\r\n", b"\n"): break
+            if len(http_lines) > 64: break
+
+        req_text = b"".join(http_lines).decode(errors="replace")
+        if not _ws_handshake(req_text, writer):
+            return
+
+        # ---- 循环处理消息 ----
+        buf = b""
+        while True:
+            raw = await asyncio.wait_for(reader.read(65536), timeout=60.0)
+            if not raw: break
+            buf += raw
+            frames, buf = _parse_ws_frames(buf)
+            for payload in frames:
+                try:
+                    msg = json.loads(payload.decode(errors="replace"))
+                except Exception:
+                    continue
+
+                # 首次必须带 token 注册
+                if msg.get("type") == "register":
+                    token = msg.get("token", "")
+                    nick = msg.get("nickname", "")
+                    if not token or token not in tokens:
+                        _send_ws_json(writer, {"type": "error", "error": "token 无效，请重新登录"})
+                        break
+                    peer_id = tokens.pop(token)   # token 一次性
+                    nickname = nick
+                    # 查数据库取真实昵称（可信源）
+                    with _db_lock, get_db() as conn:
+                        row = conn.execute("SELECT nickname FROM users WHERE peer_id=?", (peer_id,)).fetchone()
+                        if row: nickname = row["nickname"]
+                    clients[peer_id] = {"nickname": nickname, "ws": writer, "address": address, "last_ping": time.time()}
+                    reverse_peers[writer] = peer_id
+                    log.info(f"✅ 注册 peer={peer_id[:6]} nickname={nickname}")
+                    # 回给客户端
+                    _send_ws_json(writer, {"type": "connected", "peer_id": peer_id, "name": nickname})
+                    # 广播 peers
+                    _broadcast_peers()
+                    # 通知其他人
+                    for pid, info in clients.items():
+                        if pid != peer_id:
+                            _send_ws_json(info["ws"], {"type": "peer_joined", "peer": {"peer_id": peer_id, "name": nickname}})
+
+                elif msg.get("type") == "ping":
+                    if peer_id and peer_id in clients:
+                        clients[peer_id]["last_ping"] = time.time()
+                    _send_ws_json(writer, {"type": "pong"})
+
+                elif msg.get("type") == "leave":
+                    break
+
+                elif msg.get("type") == "signal":
+                    to = msg.get("to", "")
+                    if to in clients:
+                        _send_ws_json(clients[to]["ws"], {
+                            "type": "signal", "from": peer_id, "from_name": clients[peer_id]["nickname"],
+                            "to": to, "to_name": clients[to]["nickname"],
+                            "payload": msg.get("payload", {}),
+                        })
+                    else:
+                        _send_ws_json(writer, {"type": "signal_error", "error": "对端不在线"})
+
+    except asyncio.TimeoutError:
+        log.warning(f"连接 {address} 超时")
+    except Exception as e:
+        log.error(f"连接 {address} 异常: {e}")
+    finally:
+        if peer_id:
+            cleanup_client(peer_id, "连接断开")
+            _broadcast_peers()
+            for pid, info in clients.items():
+                _send_ws_json(info["ws"], {"type": "peer_left", "peer_id": peer_id})
+        try: writer.close(); await writer.wait_closed()
+        except: pass
+
+def _broadcast_peers():
+    peers_list = [{"peer_id": pid, "name": info["nickname"]} for pid, info in clients.items()]
+    for pid, info in clients.items():
+        _send_ws_json(info["ws"], {"type": "peers", "peers": peers_list})
+
+def _send_ws_json(writer, obj: dict):
+    try:
+        payload = json.dumps(obj, ensure_ascii=False).encode()
+        frame = _make_ws_frame(payload)
+        writer.write(frame)
+    except: pass
+    try: asyncio.get_event_loop().run_in_executor(None, writer.drain)
+    except: pass
+
+def _make_ws_frame(payload: bytes) -> bytes:
+    # 简单的 unmasked server frame（浏览器客户端屏蔽掩码位不处理）
+    length = len(payload)
+    if length < 126:
+        header = bytes([0x81, length])
+    elif length < 65536:
+        header = bytes([0x81, 126]) + length.to_bytes(2, "big")
+    else:
+        header = bytes([0x81, 127]) + length.to_bytes(8, "big")
+    return header + payload
+
+def _parse_ws_frames(buf: bytes) -> tuple:
+    frames = []
+    while len(buf) >= 2:
+        b0, b1 = buf[0], buf[1]
+        mask = b1 & 0x80
+        plen = b1 & 0x7F
+        offset = 2
+        if plen == 126:
+            if len(buf) < 4: break
+            plen = int.from_bytes(buf[2:4], "big"); offset = 4
+        elif plen == 127:
+            if len(buf) < 10: break
+            plen = int.from_bytes(buf[2:10], "big"); offset = 10
+        mask_key = buf[offset:offset+4] if mask else b""
+        payload_start = offset + (4 if mask else 0)
+        if len(buf) < payload_start + plen: break
+        payload = buf[payload_start:payload_start+plen]
+        if mask: payload = bytes(b ^ mask_key[i % 4] for i, b in enumerate(payload))
+        # 跳过控制帧
+        op = b0 & 0x0F
+        if op == 0x08: return frames, b""   # close
+        if op == 0x09:   # ping → 回 pong
+            pass
+        elif op in (0x01, 0x02):
+            frames.append(payload)
+        buf = buf[payload_start + plen:]
+    return frames, buf
+
+def _ws_handshake(text: str, writer) -> bool:
+    if "\r\nUpgrade: websocket\r\n" not in text and "upgrade: websocket" not in text.lower():
+        log.warning("握手: 缺少 Upgrade: websocket 头"); return False
+    if "sec-websocket-key" not in text.lower():
+        log.warning("握手: 缺少 Sec-WebSocket-Key"); return False
+    import base64, hashlib as _h
     for line in text.split("\r\n"):
-        if line.lower().startswith("sec-websocket-key:"):
-            key = line.split(":", 1)[1].strip()
-            break
-    if not key:
-        log.warn(f"握手: 缺少 Sec-WebSocket-Key 头")
-        return False
-
-    log.info(f"握手: Key={key[:8]}...  准备 Sec-WebSocket-Accept")
-
-    # 计算 handshake response
-    magic = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
-    accept = base64.b64encode(
-        hashlib.sha1(magic.encode("utf-8")).digest()
-    ).decode("utf-8")
-
-    response = (
+        if "sec-websocket-key" in line.lower():
+            key = line.split(":", 1)[1].strip(); break
+    else: return False
+    accept = base64.b64encode(_h.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+    resp = (
         "HTTP/1.1 101 Switching Protocols\r\n"
         "Upgrade: websocket\r\n"
         "Connection: Upgrade\r\n"
         f"Sec-WebSocket-Accept: {accept}\r\n"
         "\r\n"
     )
-    try:
-        conn.sendall(response.encode("utf-8"))
-    except Exception as e:
-        log.warn(f"握手: 发送响应失败: {e}")
-        return False
-
-    # 恢复原超时（handle_client 后面还要用）
-    try:
-        conn.settimeout(None)
-    except Exception:
-        pass
-
+    writer.write(resp.encode())
     log.info(f"握手: ✅ 成功")
     return True
 
-
-def ws_recv_frame(conn):
-    """接收一个 WebSocket 帧 —— 返回 (opcode, payload_bytes)，异常则返回 None"""
-    # 读头
-    header = b""
-    while len(header) < 2:
-        chunk = conn.recv(2 - len(header))
-        if not chunk:
-            return None
-        header += chunk
-
-    b0, b1 = header[0], header[1]
-    fin = (b0 & 0x80) != 0
-    opcode = b0 & 0x0F
-    masked = (b1 & 0x80) != 0
-    length = b1 & 0x7F
-
-    if length == 126:
-        header += conn.recv(2)
-        length = int.from_bytes(header[2:4], "big")
-    elif length == 127:
-        header += conn.recv(8)
-        length = int.from_bytes(header[2:10], "big")
-
-    # mask key
-    mask_key = b""
-    if masked:
-        while len(mask_key) < 4:
-            chunk = conn.recv(4 - len(mask_key))
-            if not chunk:
-                return None
-            mask_key += chunk
-
-    # payload
-    payload = b""
-    remaining = length
-    while remaining > 0:
-        chunk = conn.recv(min(4096, remaining))
-        if not chunk:
-            return None
-        payload += chunk
-        remaining -= len(chunk)
-
-    # 解 mask
-    if masked:
-        payload = bytes(
-            b ^ mask_key[i % 4] for i, b in enumerate(payload)
-        )
-
-    return opcode, payload
-
-
-def ws_send_frame(conn, opcode, payload_bytes):
-    """发送一个 WebSocket 帧（服务器→客户端，不 mask）"""
-    frame = bytearray()
-    # FIN + opcode
-    frame.append(0x80 | (opcode & 0x0F))
-    # length
-    n = len(payload_bytes)
-    if n < 126:
-        frame.append(n)
-    elif n < 65536:
-        frame.append(126)
-        frame += n.to_bytes(2, "big")
-    else:
-        frame.append(127)
-        frame += n.to_bytes(8, "big")
-    frame += payload_bytes
-    conn.sendall(bytes(frame))
-
-
-def ws_send_text(conn, text):
-    """发送文本帧"""
-    ws_send_frame(conn, 0x1, text.encode("utf-8"))
-
-
-def ws_send_json(conn, obj):
-    """发送 JSON"""
-    ws_send_text(conn, json.dumps(obj))
-
-
-# ============ Peer 管理 ============
-
-class Peer:
-    """一个在线 WebSocket 客户端"""
-    def __init__(self, peer_id, conn, addr):
-        self.peer_id = peer_id
-        self.conn = conn
-        self.addr = addr
-        self.name = f"peer-{peer_id[:6]}"
-        self.last_activity = time.time()
-        self.lock = threading.Lock()
-
-
-peers = {}          # peer_id -> Peer
-peers_lock = threading.Lock()
-connected_clients = {}   # conn.fileno() -> peer_id （用于快速查找关闭的连接）
-
-
-def broadcast_to_all(msg_json, exclude=None):
-    """给所有在线 peer 发一条 JSON"""
-    with peers_lock:
-        targets = list(peers.values())
-    for p in targets:
-        if exclude and p.peer_id == exclude:
-            continue
-        try:
-            with p.lock:
-                ws_send_json(p.conn, msg_json)
-        except Exception:
-            pass
-
-
-def send_to(peer_id, msg_json):
-    """给指定 peer_id 发一条 JSON"""
-    with peers_lock:
-        p = peers.get(peer_id)
-    if not p:
-        return False
-    try:
-        with p.lock:
-            ws_send_json(p.conn, msg_json)
-        return True
-    except Exception:
-        return False
-
-
-# ============ 客户端处理 ============
-
-def handle_client(conn, addr):
-    """处理一个 WebSocket 客户端连接的主循环"""
-    peer_id = None
-    try:
-        # WebSocket 握手
-        if not ws_handshake(conn):
-            log.warn(f"握手失败: {addr}")
-            return
-        conn.settimeout(HEARTBEAT_TIMEOUT + 5)
-
-        # 接收帧
-        while True:
-            try:
-                result = ws_recv_frame(conn)
-            except socket.timeout:
-                log.warn(f"超时断开 {peer_id or addr}")
-                break
-            except OSError:
-                break
-
-            if result is None:
-                break
-
-            opcode, payload = result
-
-            if opcode == 0x8:   # close
-                break
-            elif opcode == 0x9:  # ping
-                ws_send_frame(conn, 0xA, payload)
-                continue
-            elif opcode in (0x1, 0x2):
-                pass  # 正常业务帧
-            else:
-                continue
-
-            # 解析 JSON
-            try:
-                msg = json.loads(payload.decode("utf-8"))
-            except Exception:
-                continue
-
-            # 心跳
-            if msg.get("type") == "ping":
-                if peer_id:
-                    with peers_lock:
-                        p = peers.get(peer_id)
-                    if p:
-                        p.last_activity = time.time()
-                send_to(peer_id, {"type": "pong"})
-                continue
-
-            # 注册 (第一条消息必须是 register)
-            if msg.get("type") == "register":
-                if peer_id:
-                    continue  # 已注册就忽略
-                name = msg.get("name") or f"peer-{uuid.uuid4().hex[:6]}"
-                peer_id = uuid.uuid4().hex[:8]
-                p = Peer(peer_id, conn, addr)
-                p.name = name
-                with peers_lock:
-                    peers[peer_id] = p
-                    connected_clients[conn.fileno()] = peer_id
-                log.info(f"【新客户端】{name}({peer_id}) 来自 {addr}")
-                # 确认注册成功
-                ws_send_json(conn, {
-                    "type": "connected",
-                    "peer_id": peer_id,
-                    "name": name,
-                })
-                # 通知其他人：有新 peer 上线
-                broadcast_to_all({
-                    "type": "peer_joined",
-                    "peer": {"peer_id": peer_id, "name": name},
-                }, exclude=peer_id)
-                # 告诉新 peer 当前有哪些人
-                with peers_lock:
-                    peer_list = [
-                        {"peer_id": pid, "name": p.name}
-                        for pid, p in peers.items()
-                    ]
-                ws_send_json(conn, {"type": "peers", "peers": peer_list})
-                continue
-
-            # 下面的都必须已注册
-            if not peer_id:
-                continue
-
-            # 请求 peer 列表
-            if msg.get("type") == "list":
-                with peers_lock:
-                    peer_list = [
-                        {"peer_id": pid, "name": p.name}
-                        for pid, p in peers.items()
-                    ]
-                send_to(peer_id, {"type": "peers", "peers": peer_list})
-                continue
-
-            # 转发 WebRTC 信令（offer / answer / ice_candidate）
-            if msg.get("type") == "signal":
-                target = msg.get("to")
-                payload = msg.get("payload")
-                if not target or not payload:
-                    continue
-                forwarded = {
-                    "type": "signal",
-                    "from": peer_id,
-                    "from_name": peers.get(peer_id, Peer("", conn, addr)).name,
-                    "to": target,
-                    "payload": payload,
-                }
-                if not send_to(target, forwarded):
-                    # 目标不在线，告诉发送方
-                    send_to(peer_id, {
-                        "type": "signal_error",
-                        "to": target,
-                        "msg": "target offline",
-                    })
-                continue
-
-            # leave
-            if msg.get("type") == "leave":
-                break
-
-    except Exception as e:
-        log.error(f"handle_client 异常 {addr}: {e}")
-    finally:
-        # 清理
-        if peer_id:
-            with peers_lock:
-                peers.pop(peer_id, None)
-                connected_clients.pop(conn.fileno(), None)
-            # 通知其他人
-            broadcast_to_all({
-                "type": "peer_left",
-                "peer_id": peer_id,
-            })
-            log.info(f"【客户端下线】{peer_id}")
-        try:
-            conn.close()
-        except Exception:
-            pass
-
-
-# ============ 超时清理线程 ============
-
-def cleanup_loop():
+# ==================== 心跳清理定时器 ====================
+async def heartbeat_check():
     while True:
-        time.sleep(5)
+        await asyncio.sleep(10)
         now = time.time()
-        stale = []
-        with peers_lock:
-            for pid, p in list(peers.items()):
-                if now - p.last_activity > HEARTBEAT_TIMEOUT:
-                    stale.append(pid)
-        for pid in stale:
-            log.warn(f"【超时清理】{pid}")
-            with peers_lock:
-                p = peers.pop(pid, None)
-            if p:
-                try:
-                    with p.lock:
-                        p.conn.close()
-                except Exception:
-                    pass
-            broadcast_to_all({"type": "peer_left", "peer_id": pid})
+        for pid, info in list(clients.items()):
+            if now - info.get("last_ping", 0) > HEARTBEAT_TIMEOUT:
+                log.warning(f"超时清理 {pid[:6]} ({info.get('nickname')})")
+                try: info["ws"].close()
+                except: pass
+                cleanup_client(pid, "心跳超时")
+                for other_pid, other_info in clients.items():
+                    _send_ws_json(other_info["ws"], {"type": "peer_left", "peer_id": pid})
+                _broadcast_peers()
 
+# ==================== 启动 ====================
 
-# ============ 入口 ============
+def start_http_server():
+    server = ThreadingHTTPServer((HOST, WS_PORT + 1), HTTPHandler)
+    log.info(f"HTTP API 监听 {HOST}:{WS_PORT + 1}  (注册/登录)")
+    server.serve_forever()
 
-def get_local_ip():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return "127.0.0.1"
-
+async def start_websocket_server():
+    server = await asyncio.start_server(ws_handler, HOST, WS_PORT)
+    log.info(f"WebSocket 信令 监听 {HOST}:{WS_PORT}")
+    asyncio.create_task(heartbeat_check())
+    async with server:
+        await server.serve_forever()
 
 def main():
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_sock.bind((WS_HOST, WS_PORT))
-    server_sock.listen(64)
-    server_sock.settimeout(1.0)
-
-    threading.Thread(target=cleanup_loop, daemon=True).start()
-
-    log.info("=" * 60)
-    log.info(f"WebSocket 信令服务器启动")
-    log.info(f"监听: ws://{get_local_ip()}:{WS_PORT}")
-    log.info(f"超时: {HEARTBEAT_TIMEOUT}s | 清理: 每 5s")
-    log.info("=" * 60)
-
-    try:
-        while True:
-            try:
-                conn, addr = server_sock.accept()
-                conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                threading.Thread(
-                    target=handle_client, args=(conn, addr), daemon=True
-                ).start()
-            except socket.timeout:
-                continue
-            except KeyboardInterrupt:
-                break
-    finally:
-        server_sock.close()
-        log.info("服务器关闭")
-
+    init_db()
+    log.info(f"SQLite 用户库: {DB_PATH}")
+    threading.Thread(target=start_http_server, daemon=True).start()
+    asyncio.run(start_websocket_server())
 
 if __name__ == "__main__":
     main()

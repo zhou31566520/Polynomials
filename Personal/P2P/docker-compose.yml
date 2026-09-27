@@ -32,7 +32,12 @@ services:
     container_name: p2p-ws-server
     restart: unless-stopped
     ports:
-      - "8889:8889"
+      - "8889:8889"    # WebSocket 信令
+      - "8890:8890"    # HTTP API（注册/登录）
+    volumes:
+      # ★ 改目录挂载，DB 和 journal 文件都在里面，不会丢
+      - ./data:/app/data
+    command: python p2p_ws_server.py
     environment:
       TZ: Asia/Shanghai
     healthcheck:
