@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -366,10 +366,13 @@
 </head>
 <body>
 <!-- 注册 / 登录 模态框 -->
-<div id="authModal"
-     style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;">
+<div id="authModal" onclick="if(event.target===this)hideAuthModal()"
+     style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9999;">
     <div style="background:#fff;border-radius:14px;padding:28px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.25);">
-        <h2 id="authTitle" style="margin:0 0 20px;font-size:20px;color:#1f2937;">🔐 注册 / 登录</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h2 id="authTitle" style="margin:0;font-size:20px;color:#1f2937;">🔐 注册 / 登录</h2>
+            <button onclick="hideAuthModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;padding:0 4px;line-height:1;">✕</button>
+        </div>
 
         <div style="display:flex;gap:6px;margin-bottom:16px;">
             <button id="tabLogin" onclick="authSwitch('login')"
@@ -414,6 +417,8 @@
     </select>
     <button id="btnConnect" class="btn-primary">连接</button>
     <button id="btnDisconnect" class="btn-danger" style="display:none">断开</button>
+\1    <button id="btnLogin" onclick="showAuthModal('login')" style="padding:6px 14px;border:1px solid #3b82f6;background:#fff;color:#3b82f6;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">登录</button>
+    <button id="btnLogout" onclick="logout()" style="padding:6px 14px;border:1px solid #ef4444;background:#fff;color:#ef4444;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;display:none;">登出</button>
     <span id="status" class="status"><span class="dot"></span>未连接</span>
 </div>
 
@@ -508,20 +513,29 @@
             input.style.height = Math.min(input.scrollHeight, 120) + "px";
         });
 
-        // ✅ 新增：页面加载时判断登录状态
-        const authModal = document.getElementById("authModal");
+        // ✅ 页面加载：只切换登录/登出按钮，不自动弹登录框
         if (state.token && state.nickname) {
-            // localStorage 有 token → 隐藏登录框，自动尝试连接
-            authModal.style.display = "none";
             document.getElementById("myName").value = state.nickname;
+            document.getElementById("btnLogin").style.display = "none";
+            document.getElementById("btnLogout").style.display = "";
             log("💾 检测到本地登录状态，自动连接...");
             setTimeout(() => doConnect(), 300);
         } else {
-            // 没有 token → 确保登录框显示
-            authModal.style.display = "flex";
+            document.getElementById("btnLogin").style.display = "";
+            document.getElementById("btnLogout").style.display = "none";
         }
     });
-    // ★ 新增：用户切回标签页/窗口时立即续命
+
+    function showAuthModal(mode) {
+        document.getElementById("authModal").style.display = "flex";
+        authSwitch(mode || "login");
+    }
+
+    function hideAuthModal() {
+        document.getElementById("authModal").style.display = "none";
+    }
+
+// ★ 新增：用户切回标签页/窗口时立即续命
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
             // 刚切回来，立即发一个 ping + 检查 WS 状态
@@ -551,6 +565,9 @@
         el.innerHTML = `<span class="dot"></span>${text || (connected ? "已连接" : "未连接")}`;
         document.getElementById("btnConnect").style.display = connected ? "none" : "";
         document.getElementById("btnDisconnect").style.display = connected ? "" : "none";
+        // 同步登录/登出按钮
+        document.getElementById("btnLogin").style.display = (state.token ? "none" : "");
+        document.getElementById("btnLogout").style.display = (state.token ? "" : "none");
     }
 
     function setConnBadge(peerId, status) {
@@ -729,8 +746,9 @@
                         state.reconnectTimer = null;
                     }
                     // 不关 P2P DataChannel！已经建立好的连接继续工作
-                    const modal = document.getElementById("authModal");
-                    modal.style.display = "flex";
+                    document.getElementById("btnLogin").style.display = "";
+                    document.getElementById("btnLogout").style.display = "none";
+                    showAuthModal("login");
                     document.getElementById("authMsg").textContent = "登录已过期，请重新登录";
                     document.getElementById("authMsg").style.color = "#f59e0b";
                 }
@@ -1341,7 +1359,9 @@
             localStorage.setItem("p2p_username", state.username);
 
             // 隐藏模态框
-            document.getElementById("authModal").style.display = "none";
+            hideAuthModal();
+            document.getElementById("btnLogin").style.display = "none";
+            document.getElementById("btnLogout").style.display = "";
             log("✅ 登录成功 nickname=", state.nickname, "peer_id=", state.myPeerId?.slice(0, 6));
 
             // 自动把昵称填到连接框里，然后触发连接
@@ -1359,19 +1379,15 @@
         localStorage.removeItem("p2p_nickname");
         localStorage.removeItem("p2p_username");
         state.token = null;
+        state.nickname = null;
+        state.username = null;
         doDisconnect();
-        document.getElementById("authModal").style.display = "flex";
+        document.getElementById("btnLogin").style.display = "";
+        document.getElementById("btnLogout").style.display = "none";
+        showAuthModal("login");
     }
 
-    // 页面加载时：如果已有 token → 直接显示昵称，隐藏模态框
-    window.addEventListener("DOMContentLoaded", () => {
-        if (state.token && state.nickname) {
-            document.getElementById("authModal").style.display = "none";
-            document.getElementById("myName").value = state.nickname;
-            // 自动连接
-            setTimeout(doConnect, 100);
-        }
-    });
+    
 
     window.onbeforeunload = () => doDisconnect();
 </script>
