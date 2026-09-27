@@ -130,7 +130,7 @@ clients = {}       # peer_id -> {"nickname", "ws", "address", "last_ping"}
 reverse_peers = {} # ws -> peer_id
 tokens = {}        # token -> peer_id
 
-HEARTBEAT_TIMEOUT = 30   # 秒
+HEARTBEAT_TIMEOUT = 120   # 秒
 
 def gen_token() -> str:
     return secrets.token_hex(16)   # 32 位
@@ -139,12 +139,11 @@ def cleanup_client(peer_id: str, reason: str = ""):
     info = clients.pop(peer_id, None)
     if info and info.get("ws") in reverse_peers:
         reverse_peers.pop(info["ws"], None)
-    for t, pid in list(tokens.items()):
-        if pid == peer_id:
-            tokens.pop(t, None)
+    # ★ 不再清 token！让客户端可以带着原 token 重新注册
+    # token 本身已经在 register 时 get 后 pop 掉了（一次性），这里清不清都无所谓
+    # 但 heartbeat_check 主动踢人的情况，token 肯定还在，留给客户端重连用
     if info:
         log.info(f"清理客户端 {peer_id[:6]} ({info.get('nickname')}) reason={reason}")
-
 # ==================== HTTP 层：注册 + 登录 ====================
 
 class HTTPHandler(BaseHTTPRequestHandler):
@@ -229,7 +228,7 @@ async def ws_handler(reader, writer):
         # ---- 循环处理消息 ----
         buf = b""
         while True:
-            raw = await asyncio.wait_for(reader.read(65536), timeout=60.0)
+            raw = await reader.read(65536)   # 不设超时，断连由 heartbeat_check 负责
             if not raw: break
             buf += raw
             frames, buf = _parse_ws_frames(buf)

@@ -521,6 +521,29 @@
             authModal.style.display = "flex";
         }
     });
+    // ★ 新增：用户切回标签页/窗口时立即续命
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+            // 刚切回来，立即发一个 ping + 检查 WS 状态
+            if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+                state.ws.send(JSON.stringify({type: "ping"}));
+                log("👁️ 回到前台，立即发送 ping 续命");
+            } else if (state.token) {
+                // WS 已断但还有 token → 立即重连（不等 3 秒 timer）
+                log("👁️ 回到前台，WS 已断，立即重连");
+                if (state.reconnectTimer) {
+                    clearTimeout(state.reconnectTimer);
+                    state.reconnectTimer = null;
+                }
+                doConnect();
+            }
+        }
+    });
+    window.addEventListener("focus", () => {
+        if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+            state.ws.send(JSON.stringify({type: "ping"}));
+        }
+    });
 
     function setStatus(connected, text) {
         const el = document.getElementById("status");
@@ -549,7 +572,7 @@
             if (state.ws && state.ws.readyState === WebSocket.OPEN) {
                 state.ws.send(JSON.stringify({type: "ping"}));
             }
-        }, 10000);
+        }, 5000);   // ★ 5 秒一次，对抗浏览器后台节流
     }
 
     function stopHeartbeat() {
@@ -608,11 +631,17 @@
                 ? `信令断开 (${peerCount} 条 P2P 直连仍可用)`
                 : "信令服务器断开");
 
-            // 如果不是用户主动断开（doDisconnect 会清 token），尝试重连
+            // 如果不是用户主动断开，尝试重连（带原 token 去试，试失败 error handler 会清）
             if (state.token) {
-                log("🔄 尝试重连信令服务器...");
+                log("🔄 尝试重连信令服务器... (token=" + state.token.slice(0, 8) + "...)");
                 if (state.reconnectTimer) clearTimeout(state.reconnectTimer);
-                state.reconnectTimer = setTimeout(doConnect, 3000);
+                state.reconnectTimer = setTimeout(doConnect, 2000);  // 2 秒更快响应
+            } else {
+                // 没 token 说明 error handler 已经清过了，弹登录框
+                const modal = document.getElementById("authModal");
+                if (modal.style.display !== "flex") {
+                    modal.style.display = "flex";
+                }
             }
         };
     }
