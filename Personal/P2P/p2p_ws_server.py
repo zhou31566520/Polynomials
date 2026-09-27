@@ -128,7 +128,19 @@ def authenticate_user(username: str, password: str) -> tuple:
 
 clients = {}       # peer_id -> {"nickname", "ws", "address", "last_ping"}
 reverse_peers = {} # ws -> peer_id
-tokens = {}        # token -> peer_id
+tokens = {}        # token -> {"peer_id": str, "created_at": float}
+TOKEN_TTL = 24 * 3600   # 24 小时有效 (允许 Ctrl+Shift+R 刷新重连)
+
+def _is_token_valid(token: str) -> bool:
+    """检查 token 是否存在且未过期, 过期自动清理"""
+    entry = tokens.get(token)
+    if not entry:
+        return False
+    if time.time() - entry["created_at"] > TOKEN_TTL:
+        tokens.pop(token, None)
+        return False
+    return True
+
 
 HEARTBEAT_TIMEOUT = 120   # 秒
 
@@ -187,7 +199,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
             if ok:
                 # 注册成功自动发一个登录 token（让前端无需再单独登录）
                 token = gen_token()
-                tokens[token] = result   # result 就是 peer_id
+                tokens[token] = {"peer_id": result, "created_at": time.time()}
                 self._send_json(200, {"ok": True, "peer_id": result, "token": token})
             else:
                 self._send_json(400, {"ok": False, "error": result})
@@ -196,7 +208,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
             ok, peer_id, nickname = authenticate_user(data.get("username",""), data.get("password",""))
             if ok:
                 token = gen_token()
-                tokens[token] = peer_id
+                tokens[token] = {"peer_id": peer_id, "created_at": time.time()}
                 self._send_json(200, {"ok": True, "peer_id": peer_id, "nickname": nickname, "token": token})
             else:
                 self._send_json(401, {"ok": False, "error": peer_id})
@@ -239,17 +251,15 @@ async def ws_handler(reader, writer):
                     continue
 
                 # 首次必须带 token 注册
+                # 首次必须带 token 注册 (token 24h 有效,允许刷新重连)
                 if msg.get("type") == "register":
                     token = msg.get("token", "")
                     nick = msg.get("nickname", "")
-                    if not token or token not in tokens:
-                        _send_ws_json(writer, {"type": "error", "error": "token 无效，请重新登录"})
+                    if not token or not _is_token_valid(token):
+                        _send_ws_json(writer, {"type": "error", "error": "token 无效或已过期,请重新登录"})
                         break
-                    peer_id = tokens.get(token)   # ✅ 改为 get，不立即 pop
-                    if not peer_id:
-                        _send_ws_json(writer, {"type": "error", "error": "token 无效，请重新登录"})
-                        break
-                    tokens.pop(token, None)
+                    peer_id = tokens[token]["peer_id"]   # 从带时间戳 dict 取
+                    # ★ 不再 pop token! 24h 内有效,允许 WS 重连
                     nickname = nick
                     # 查数据库取真实昵称（可信源）
                     with _db_lock, get_db() as conn:

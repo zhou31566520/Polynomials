@@ -661,11 +661,9 @@
                 if (state.reconnectTimer) clearTimeout(state.reconnectTimer);
                 state.reconnectTimer = setTimeout(doConnect, 2000);  // 2 秒更快响应
             } else {
-                // 没 token 说明 error handler 已经清过了，弹登录框
-                const modal = document.getElementById("authModal");
-                if (modal.style.display !== "flex") {
-                    modal.style.display = "flex";
-                }
+                // 没 token 说明 error handler 已经清过了 —— 不自动弹框, 只切按钮
+                document.getElementById("btnLogin").style.display = "";
+                document.getElementById("btnLogout").style.display = "none";
             }
         };
     }
@@ -700,6 +698,12 @@
             case "connected": {
                 state.myPeerId = msg.peer_id;
                 log("✅ 注册成功 peer_id=", msg.peer_id);
+                // 双重保险: 确保按钮状态和名字都对
+                document.getElementById("btnLogin").style.display = "none";
+                document.getElementById("btnLogout").style.display = "";
+                if (state.nickname) {
+                    document.getElementById("myNameDisplay").textContent = state.nickname;
+                }
                 setStatus(true, `已连接 ${msg.peer_id}`);
                 break;
             }
@@ -786,13 +790,21 @@
         div.className = "peer-item" + (state.activeTab === id ? " active" : "");
         div.dataset.id = id;
 
-        // ★ 计算未读数
+        // 小圆点: 公共聊天室固定灰色, 其他人看 DataChannel 是否 open
+        let dotColor = "#9ca3af";
+        if (id !== "__public__") {
+            const dc = state.dataChannels.get(id);
+            if (dc && dc.readyState === "open") dotColor = "#22c55e";
+        }
+
+        // 未读数
         const count = state.unreadCounts.get(id) || 0;
         const badgeText = count > 99 ? "99+" : (count > 0 ? count : "");
 
         div.innerHTML =
+            `<span class="dot" style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;margin-right:8px;vertical-align:middle;box-shadow:${dotColor === "#22c55e" ? "0 0 4px #22c55e" : "none"};"></span>` +
             `<span class="pname">${name}</span>` +
-            (id !== "__public__" ? `<span class="pid">${id.slice(0, 6)}</span>` : "") +
+            (id !== "__public__" ? `<span class="pid" style="margin-left:auto;">${id.slice(0, 6)}</span>` : "") +
             `<span class="unread-badge ${badgeText ? "" : "hidden"}">${badgeText}</span>`;
 
         div.onclick = () => selectPeer(id);
@@ -958,11 +970,13 @@
         dc.onopen = () => {
             log("  🌟 DataChannel OPEN peer=", peerId.slice(0, 6));
             if (state.activeTab === peerId) setConnBadge(peerId, "connected");
+            renderPeerList();  // ★ 重绘让小圆点变绿
         };
         dc.onclose = () => {
             log("  ⚠️ DataChannel CLOSE peer=", peerId.slice(0, 6));
             state.dataChannels.delete(peerId);
             if (state.activeTab === peerId) setConnBadge(peerId, "idle");
+            renderPeerList();  // ★ 重绘让小圆点变灰
         };
         dc.onerror = (e) => err("  ❌ DataChannel error:", e);
         dc.onmessage = (ev) => handlePeerMessage(peerId, ev.data);
