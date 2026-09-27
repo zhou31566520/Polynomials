@@ -403,7 +403,7 @@
     </div>
 </div>
 <div class="toolbar">
-        <label>我的名字:</label>
+    <label>我的名字:</label>
     <input id="myName" value="web-user" style="width:120px" readonly>
     <label>信令WS:</label>
     <select id="wsUrl" style="width:220px;padding:4px 6px;border:1px solid #d1d5db;border-radius:6px;background:#fff">
@@ -448,12 +448,14 @@
         ws: null,
         myPeerId: null,
         myName: null,
-        token: localStorage.getItem("p2p_token") || null,   // ★ 新增
-        nickname: localStorage.getItem("p2p_nickname") || null,  // ★ 新增
-        username: localStorage.getItem("p2p_username") || null,   // ★ 新增
-        peers: new Map(),
-        connections: new Map(),
-        dataChannels: new Map(),
+        token: localStorage.getItem("p2p_token") || null,
+        nickname: localStorage.getItem("p2p_nickname") || null,
+        username: localStorage.getItem("p2p_username") || null,
+        peers: new Map(),                  // peer_id -> {name}
+        connections: new Map(),            // peer_id -> RTCPeerConnection
+        dataChannels: new Map(),           // peer_id -> chat DataChannel
+        gossipChannels: new Map(),         // peer_id -> gossip DataChannel  ★ 新增
+        reconnectTimer: null,              // ★ WS 重连定时器
         activeTab: "__public__",
         messages: new Map(),
         unreadCounts: new Map(),
@@ -596,47 +598,48 @@
         state.ws.onclose = (e) => {
             log("🔌 WS 关闭 code=", e.code, "reason=", e.reason);
             stopHeartbeat();
-            setStatus(false, "信令服务器断开");
+            state.ws = null;
 
-            // ✅ 新增：如果还带着 token 但连接意外断开，可能是 token 失效
-            // 等 500ms 看是否 error handler 已经处理过了（error 先到，onclose 后到）
+            // ★ P2P DataChannel 保持！不清！
+            const peerCount = state.dataChannels.size;
+            log(`💡 信令服务器断开，但保持 ${peerCount} 条 P2P DataChannel 继续工作`);
+
+            setStatus(false, peerCount > 0
+                ? `信令断开 (${peerCount} 条 P2P 直连仍可用)`
+                : "信令服务器断开");
+
+            // 如果不是用户主动断开（doDisconnect 会清 token），尝试重连
             if (state.token) {
-                // 给 error handler 一点时间清状态
-                setTimeout(() => {
-                    if (state.token) {
-                        // 状态还在说明不是 token 失效，只是网络断了
-                        log("🔄 网络异常，保留登录状态等待重连...");
-                    }
-                }, 500);
-            } else {
-                // token 已被清掉（error handler 处理过），确保登录框在
-                const modal = document.getElementById("authModal");
-                if (modal.style.display !== "flex") {
-                    modal.style.display = "flex";
-                }
+                log("🔄 尝试重连信令服务器...");
+                if (state.reconnectTimer) clearTimeout(state.reconnectTimer);
+                state.reconnectTimer = setTimeout(doConnect, 3000);
             }
         };
     }
 
     function doDisconnect() {
+        // 用户主动点击"断开" —— 彻底断掉
+        log("👤 用户主动断开信令服务器");
+        if (state.reconnectTimer) {
+            clearTimeout(state.reconnectTimer);
+            state.reconnectTimer = null;
+        }
         stopHeartbeat();
-        state.connections.forEach((c) => {
-            try {
-                c.close();
-            } catch {
-            }
-        });
-        state.connections.clear();
-        state.dataChannels.clear();
         if (state.ws) {
             try {
                 state.ws.send(JSON.stringify({type: "leave"}));
             } catch {
             }
-            state.ws.close();
+            try {
+                state.ws.close();
+            } catch {
+            }
             state.ws = null;
         }
-        setStatus(false);
+        // ★ P2P DataChannel 保持！用户主动断开信令 ≠ 要关掉 P2P
+        setStatus(false, state.dataChannels.size > 0
+            ? `已手动断开信令 (${state.dataChannels.size} 条 P2P 仍在)`
+            : "已断开");
     }
 
     function handleSignalingMessage(msg) {
@@ -683,10 +686,9 @@
                 warn("⚠️ 对端离线 signal_error:", msg);
                 break;
             }
-            // ✅ 新增：服务端返回错误（如 token 无效）
+            // ★ 新增：服务端认证错误 → 弹登录框
             case "error": {
                 err("❌ 服务端错误:", msg.error);
-                // token 失效 → 清 localStorage + 弹登录框
                 if (msg.error && msg.error.includes("token")) {
                     localStorage.removeItem("p2p_token");
                     localStorage.removeItem("p2p_nickname");
@@ -694,10 +696,13 @@
                     state.token = null;
                     state.nickname = null;
                     state.username = null;
-                    doDisconnect();
+                    if (state.reconnectTimer) {
+                        clearTimeout(state.reconnectTimer);
+                        state.reconnectTimer = null;
+                    }
+                    // 不关 P2P DataChannel！已经建立好的连接继续工作
                     const modal = document.getElementById("authModal");
                     modal.style.display = "flex";
-                    // 提示用户
                     document.getElementById("authMsg").textContent = "登录已过期，请重新登录";
                     document.getElementById("authMsg").style.color = "#f59e0b";
                 }
@@ -788,13 +793,9 @@
 
         conn.onicecandidate = (e) => {
             if (e.candidate) {
-                log("  🧊 收集 ICE candidate:", e.candidate.type, e.candidate.candidate.slice(0, 50));
+                log("  🧊 ICE:", e.candidate.type, e.candidate.candidate.slice(0, 50));
                 sendSignal(peerId, {type: "ice_candidate", candidate: e.candidate});
             }
-        };
-
-        conn.onicegatheringstatechange = () => {
-            log("  🔨 ICE gathering state:", conn.iceGatheringState);
         };
 
         conn.onconnectionstatechange = () => {
@@ -807,32 +808,98 @@
             if (st === "failed" || st === "disconnected" || st === "closed") {
                 state.connections.delete(peerId);
                 state.dataChannels.delete(peerId);
+                state.gossipChannels.delete(peerId);   // ★ 一起清
             }
         };
 
-        conn.oniceconnectionstatechange = () => {
-            log("  ❄️ iceConnectionState →", conn.iceConnectionState);
-        };
-
         conn.ondatachannel = (e) => {
-            log("  📥 收到远端 DataChannel:", e.channel.label);
-            setupDataChannel(e.channel, peerId);
+            log("  📥 远端 DataChannel:", e.channel.label);
+            if (e.channel.label === "gossip") {
+                setupGossipChannel(e.channel, peerId);  // ★ gossip 单独 setup
+            } else {
+                setupDataChannel(e.channel, peerId);
+            }
         };
 
         if (isCaller) {
-            const dc = conn.createDataChannel("chat");
-            log("  📤 创建 DataChannel:", dc.label);
-            state.dataChannels.set(peerId, dc);
-            setupDataChannel(dc, peerId);
+            // ★ Caller 创建两个 DataChannel（callee 通过 ondatachannel 接收）
             try {
+                const chatDc = conn.createDataChannel("chat");
+                log("  📤 创建 chat DataChannel");
+                state.dataChannels.set(peerId, chatDc);
+                setupDataChannel(chatDc, peerId);
+
+                const gossipDc = conn.createDataChannel("gossip");
+                log("  📤 创建 gossip DataChannel");
+                state.gossipChannels.set(peerId, gossipDc);
+                setupGossipChannel(gossipDc, peerId);
+
                 const offer = await conn.createOffer();
                 await conn.setLocalDescription(offer);
-                log("  ✅ 创建 offer，发送给", peerId.slice(0, 6));
+                log("  ✅ offer 已发送 to", peerId.slice(0, 6));
                 sendSignal(peerId, offer);
             } catch (err) {
                 err("  ❌ createOffer 失败:", err);
             }
         }
+    }
+
+    // ★ 新增：gossip DataChannel 专用 setup
+    function setupGossipChannel(dc, peerId) {
+        dc.onopen = () => {
+            log("  🌐 gossip channel OPEN with", peerId.slice(0, 6));
+            // 刚连上就把我认识的 peer 列表推给对方
+            gossipSendPeerList(peerId);
+        };
+        dc.onclose = () => {
+            log("  ⚠️ gossip channel CLOSE with", peerId.slice(0, 6));
+            state.gossipChannels.delete(peerId);
+        };
+        dc.onerror = (e) => err("  ❌ gossip error:", e);
+        dc.onmessage = (ev) => {
+            try {
+                const msg = JSON.parse(ev.data);
+                if (msg.type === "peer_list") {
+                    const newPeers = gossipMergePeers(msg.peers, peerId);
+                    // 如果我发现了新朋友，也告诉对方我这边更新后的完整列表
+                    if (newPeers.length > 0) {
+                        gossipSendPeerList(peerId);
+                    }
+                }
+            } catch (e) {
+                err("  ❌ gossip 消息解析失败:", e);
+            }
+        };
+    }
+
+    // ★ 新增：发送我这边的 peer 列表给指定 peer
+    function gossipSendPeerList(toPeerId) {
+        const dc = state.gossipChannels.get(toPeerId);
+        if (!dc || dc.readyState !== "open") return;
+        const list = [...state.peers.entries()]
+            .filter(([id]) => id !== state.myPeerId)
+            .map(([id, info]) => ({peer_id: id, name: info.name}));
+        dc.send(JSON.stringify({type: "peer_list", from: state.myPeerId, peers: list}));
+    }
+
+    // ★ 新增：合并收到的 peer 列表，返回新发现的 peer（用于日志 + 触发连接）
+    function gossipMergePeers(remotePeers, fromPeerId) {
+        const newlyAdded = [];
+        (remotePeers || []).forEach(p => {
+            if (!p.peer_id || p.peer_id === state.myPeerId) return;
+            if (!state.peers.has(p.peer_id)) {
+                state.peers.set(p.peer_id, {name: p.name});
+                newlyAdded.push(p.peer_id);
+                log(`  🌐 gossip 发现新 peer: ${p.name} (${p.peer_id.slice(0, 6)}) via ${fromPeerId.slice(0, 6)}`);
+                // 给新 peer 预建 P2P 连接
+                ensureConnection(p.peer_id);
+            }
+        });
+        if (newlyAdded.length > 0) {
+            logSys(`🌐 gossip 发现 ${newlyAdded.length} 个新 peer，正在自动连接...`);
+            renderPeerList();
+        }
+        return newlyAdded;
     }
 
     function setupDataChannel(dc, peerId) {
@@ -925,6 +992,14 @@
             } catch {
             }
             state.dataChannels.delete(peerId);
+        }
+        const gdc = state.gossipChannels.get(peerId);   // ★ 清 gossip
+        if (gdc) {
+            try {
+                gdc.close();
+            } catch {
+            }
+            state.gossipChannels.delete(peerId);
         }
     }
 
