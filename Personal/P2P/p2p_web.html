@@ -505,6 +505,19 @@
             input.style.height = "auto";
             input.style.height = Math.min(input.scrollHeight, 120) + "px";
         });
+
+        // ✅ 新增：页面加载时判断登录状态
+        const authModal = document.getElementById("authModal");
+        if (state.token && state.nickname) {
+            // localStorage 有 token → 隐藏登录框，自动尝试连接
+            authModal.style.display = "none";
+            document.getElementById("myName").value = state.nickname;
+            log("💾 检测到本地登录状态，自动连接...");
+            setTimeout(() => doConnect(), 300);
+        } else {
+            // 没有 token → 确保登录框显示
+            authModal.style.display = "flex";
+        }
     });
 
     function setStatus(connected, text) {
@@ -584,6 +597,24 @@
             log("🔌 WS 关闭 code=", e.code, "reason=", e.reason);
             stopHeartbeat();
             setStatus(false, "信令服务器断开");
+
+            // ✅ 新增：如果还带着 token 但连接意外断开，可能是 token 失效
+            // 等 500ms 看是否 error handler 已经处理过了（error 先到，onclose 后到）
+            if (state.token) {
+                // 给 error handler 一点时间清状态
+                setTimeout(() => {
+                    if (state.token) {
+                        // 状态还在说明不是 token 失效，只是网络断了
+                        log("🔄 网络异常，保留登录状态等待重连...");
+                    }
+                }, 500);
+            } else {
+                // token 已被清掉（error handler 处理过），确保登录框在
+                const modal = document.getElementById("authModal");
+                if (modal.style.display !== "flex") {
+                    modal.style.display = "flex";
+                }
+            }
         };
     }
 
@@ -650,6 +681,26 @@
             }
             case "signal_error": {
                 warn("⚠️ 对端离线 signal_error:", msg);
+                break;
+            }
+            // ✅ 新增：服务端返回错误（如 token 无效）
+            case "error": {
+                err("❌ 服务端错误:", msg.error);
+                // token 失效 → 清 localStorage + 弹登录框
+                if (msg.error && msg.error.includes("token")) {
+                    localStorage.removeItem("p2p_token");
+                    localStorage.removeItem("p2p_nickname");
+                    localStorage.removeItem("p2p_username");
+                    state.token = null;
+                    state.nickname = null;
+                    state.username = null;
+                    doDisconnect();
+                    const modal = document.getElementById("authModal");
+                    modal.style.display = "flex";
+                    // 提示用户
+                    document.getElementById("authMsg").textContent = "登录已过期，请重新登录";
+                    document.getElementById("authMsg").style.color = "#f59e0b";
+                }
                 break;
             }
         }

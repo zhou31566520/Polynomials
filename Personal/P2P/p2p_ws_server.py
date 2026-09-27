@@ -246,7 +246,11 @@ async def ws_handler(reader, writer):
                     if not token or token not in tokens:
                         _send_ws_json(writer, {"type": "error", "error": "token 无效，请重新登录"})
                         break
-                    peer_id = tokens.pop(token)   # token 一次性
+                    peer_id = tokens.get(token)   # ✅ 改为 get，不立即 pop
+                    if not peer_id:
+                        _send_ws_json(writer, {"type": "error", "error": "token 无效，请重新登录"})
+                        break
+                    tokens.pop(token, None) 
                     nickname = nick
                     # 查数据库取真实昵称（可信源）
                     with _db_lock, get_db() as conn:
