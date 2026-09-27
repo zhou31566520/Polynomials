@@ -1,0 +1,9 @@
+# ============================================================
+# P2P Web 前端静态页面镜像
+# ============================================================
+FROM nginx:alpine
+
+COPY p2p_web.html /usr/share/nginx/html/p2p_web.html
+COPY nginx.conf   /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
