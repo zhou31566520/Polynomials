@@ -344,6 +344,31 @@ async def ws_handler(reader, writer):
                     else:
                         _send_ws_json(writer, {"type": "signal_error", "error": "对端不在线"})
 
+                elif msg.get("type") == "chat":
+                    """私聊中继 (P2P DataChannel 降级时走这里)"""
+                    to = msg.get("to", "")
+                    payload = msg.get("payload", {})
+                    if to in clients:
+                        _send_ws_json(clients[to]["ws"], {
+                            "type": "chat",
+                            "from": peer_id,
+                            "from_name": clients[peer_id]["nickname"],
+                            "payload": payload,
+                        })
+
+                elif msg.get("type") == "broadcast":
+                    """公聊中继"""
+                    payload = msg.get("payload", {})
+                    for pid, info in clients.items():
+                        if pid != peer_id:
+                            _send_ws_json(info["ws"], {
+                                "type": "chat",
+                                "from": peer_id,
+                                "from_name": clients[peer_id]["nickname"],
+                                "payload": payload,
+                                "broadcast": True,
+                            })
+
     except asyncio.TimeoutError:
         log.warning(f"连接 {address} 超时")
     except Exception as e:

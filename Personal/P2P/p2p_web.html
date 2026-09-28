@@ -892,6 +892,29 @@
                 warn("⚠️ 对端离线 signal_error:", msg);
                 break;
             }
+            // ★ WS 消息中继 (P2P 降级)
+            case "chat": {
+                const fromId = msg.from;
+                const fromName = msg.from_name || fromId?.slice(0, 6);
+                const isBroadcast = msg.broadcast === true;
+                const payload = msg.payload || {};
+                log("📨 WS 中继消息 from=", fromName?.slice(0, 6), "broadcast=", isBroadcast);
+                const msgObj = {
+                    type: "text",
+                    from: fromId,
+                    name: fromName,
+                    text: payload.text || "",
+                    ts: payload.ts || Date.now(),
+                    mine: false,
+                    viaWS: true,
+                };
+                if (isBroadcast) {
+                    addMessage("__public__", msgObj);
+                } else {
+                    addMessage(fromId, msgObj);
+                }
+                break;
+            }
             // ★ 新增：服务端认证错误 → 弹登录框
             case "error": {
                 err("❌ 服务端错误:", msg.error);
@@ -1306,26 +1329,37 @@
         input.style.height = "auto";
 
         const payload = {ts: Date.now(), name: state.myName, peer_id: state.myPeerId, text};
+        const ws = state.ws;
+        const wsOpen = ws && ws.readyState === WebSocket.OPEN;
 
         if (state.activeTab === "__public__") {
-            // 公共聊天室 —— 广播给所有 peer
-            const recipients = [];
+            // 公共聊天室 —— 先 P2P 广播, 没连上的走 WS 中继
+            const p2pOk = [];
+            const p2pFail = [];
             state.peers.forEach((info, pid) => {
                 const dc = state.dataChannels.get(pid);
                 if (dc && dc.readyState === "open") {
-                    recipients.push(pid);
                     try {
                         dc.send(JSON.stringify({kind: "broadcast", ...payload}));
+                        p2pOk.push(pid);
                     } catch (e) {
-                        warn("广播失败", pid, e);
+                        p2pFail.push(pid);
                     }
+                } else {
+                    p2pFail.push(pid);
                 }
             });
-            log("📣 广播给", recipients.length, "/", state.peers.size, "个 peer");
-            if (recipients.length === 0 && state.peers.size > 0) {
-                logSys("⚠️ 没有可用的 P2P 连接，请先点击对方 tab 或等待自动连接建立...");
-                log("  ★ 当前 DataChannels:", [...state.dataChannels.keys()]);
+
+            // 降级: 所有没连上 P2P 的人, 统一发一条 WS broadcast
+            if (p2pFail.length > 0 && wsOpen) {
+                ws.send(JSON.stringify({type: "broadcast", payload}));
+                log(`📣 P2P=${p2pOk.length} WS=${p2pFail.length}`);
+            } else if (p2pOk.length === 0 && p2pFail.length > 0 && !wsOpen) {
+                logSys("❌ P2P 和 WS 都不可用, 消息发不出去");
+            } else {
+                log("📣 广播给", p2pOk.length, "个 peer (P2P)", p2pFail.length > 0 ? "+" + p2pFail.length + " WS" : "");
             }
+
             addMessage("__public__", {
                 type: "text",
                 from: state.myPeerId,
@@ -1337,18 +1371,25 @@
         } else {
             const peerId = state.activeTab;
             const dc = state.dataChannels.get(peerId);
-            log("📤 私聊 to=", peerId.slice(0, 6), "dc=", dc?.readyState);
-            if (!dc || dc.readyState !== "open") {
-                logSys("⚠️ P2P 连接未就绪，正在建立中...");
-                ensureConnection(peerId);
-                return;
+            log("📤 私聊 to=", peerId.slice(0, 6), "dc=", dc?.readyState, "ws=", wsOpen ? "open" : "closed");
+
+            if (dc && dc.readyState === "open") {
+                try {
+                    dc.send(JSON.stringify({kind: "chat", ...payload}));
+                    addMessage(peerId, {type: "text", from: state.myPeerId, name: "我", text, mine: true, ts: payload.ts});
+                    return;
+                } catch (e) {
+                    warn("P2P 发送失败, 降级走 WS:", e.message);
+                }
             }
-            try {
-                dc.send(JSON.stringify({kind: "chat", ...payload}));
-                addMessage(peerId, {type: "text", from: state.myPeerId, name: "我", text, mine: true, ts: payload.ts});
-            } catch (e) {
-                logSys(`❌ 发送失败: ${e.message}`);
-                err("发送失败", e);
+            // ★ 降级: 走 WS 中继
+            if (wsOpen) {
+                ws.send(JSON.stringify({type: "chat", to: peerId, payload}));
+                addMessage(peerId, {type: "text", from: state.myPeerId, name: "我", text, mine: true, ts: payload.ts, viaWS: true});
+                logSys("📨 P2P 未就绪, 走服务器中继发送");
+            } else {
+                logSys("❌ 发送失败: P2P 和 WS 都不可用");
+                ensureConnection(peerId);
             }
         }
     }
