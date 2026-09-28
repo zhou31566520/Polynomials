@@ -157,6 +157,8 @@ if [[ -n "$DOMAIN" ]]; then
     certbot certonly --webroot \
         -w /var/www/certbot \
         -d "${DOMAIN}" \
+        --http-port 9080 \
+        --https-port 9443 \
         --email "admin@${DOMAIN}" \
         --agree-tos \
         --no-eff-email \
