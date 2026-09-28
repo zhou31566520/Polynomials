@@ -287,11 +287,12 @@ async def ws_handler(reader, writer):
 
         # ---- 循环处理消息 ----
         buf = b""
+        pending_state = {"buf": None, "op": None}
         while True:
-            raw = await reader.read(65536)   # 不设超时，断连由 heartbeat_check 负责
+            raw = await reader.read(65536)
             if not raw: break
             buf += raw
-            frames, buf = _parse_ws_frames(buf)
+            frames, buf = _parse_ws_frames(buf, pending_state)
             for payload in frames:
                 try:
                     msg = json.loads(payload.decode(errors="replace"))
@@ -416,10 +417,12 @@ def _make_ws_frame(payload: bytes) -> bytes:
         header = bytes([0x81, 127]) + length.to_bytes(8, "big")
     return header + payload
 
-def _parse_ws_frames(buf: bytes) -> tuple:
+def _parse_ws_frames(buf: bytes, pending_state: dict | None = None) -> tuple:
     frames = []
     while len(buf) >= 2:
         b0, b1 = buf[0], buf[1]
+        fin = bool(b0 & 0x80)
+        op = b0 & 0x0F
         mask = b1 & 0x80
         plen = b1 & 0x7F
         offset = 2
@@ -434,14 +437,30 @@ def _parse_ws_frames(buf: bytes) -> tuple:
         if len(buf) < payload_start + plen: break
         payload = buf[payload_start:payload_start+plen]
         if mask: payload = bytes(b ^ mask_key[i % 4] for i, b in enumerate(payload))
-        # 跳过控制帧
-        op = b0 & 0x0F
-        if op == 0x08: return frames, b""   # close
-        if op == 0x09:   # ping → 回 pong
-            pass
-        elif op in (0x01, 0x02):
-            frames.append(payload)
         buf = buf[payload_start + plen:]
+
+        # --- 控制帧 ---
+        if op == 0x08: return frames, b""
+        if op in (0x09, 0x0A): continue
+
+        # --- 数据帧 + continuation ---
+        if op in (0x01, 0x02):
+            if pending_state is not None:
+                pending_state["buf"] = bytearray(payload)
+                pending_state["op"] = op
+            if fin:
+                frames.append(payload)
+                if pending_state is not None:
+                    pending_state["buf"] = None
+            continue
+        elif op == 0x00:
+            if pending_state is not None and pending_state.get("buf") is not None:
+                pending_state["buf"].extend(payload)
+                if fin:
+                    frames.append(bytes(pending_state["buf"]))
+                    pending_state["buf"] = None
+            continue
+
     return frames, buf
 
 def _ws_handshake(text: str, writer) -> bool:
