@@ -1,0 +1,26 @@
+[Unit]
+Description=P2P Web Static Files (python http.server)
+After=network.target
+
+[Service]
+Type=simple
+User=p2p
+Group=p2p
+WorkingDirectory=/opt/P2P
+ExecStart=/usr/bin/python3 -m http.server 8080 --bind 127.0.0.1
+Restart=always
+RestartSec=3
+
+MemoryMax=64M
+CPUQuota=10%
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=p2p-web
+
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

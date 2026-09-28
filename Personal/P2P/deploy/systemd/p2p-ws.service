@@ -1,0 +1,32 @@
+[Unit]
+Description=P2P WebSocket Signaling Server
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=p2p
+Group=p2p
+WorkingDirectory=/opt/P2P
+ExecStart=/usr/bin/python3 -u /opt/P2P/p2p_ws_server.py
+Restart=always
+RestartSec=3
+
+# 资源限制
+MemoryMax=256M
+CPUQuota=50%
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=p2p-ws
+
+# 安全
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/P2P/data
+
+[Install]
+WantedBy=multi-user.target

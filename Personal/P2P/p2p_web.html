@@ -489,11 +489,14 @@
 
     // ==================== UI 初始化 ====================
     document.addEventListener("DOMContentLoaded", () => {
-        // 自动推导 WebSocket 地址 (和 HTTP API 同主机, WS=8889, API=8890)
+        // 自动推导 WebSocket 地址: 跟当前页面同协议 + 相对路径 /ws/
+        // 部署在 Nginx 后面时: https://xxx.com -> wss://xxx.com/ws/
+        // 本地开发时:            http://localhost:8080 -> ws://localhost:8080/ws/
         const wsAuto = document.getElementById("wsAuto");
         if (wsAuto) {
-            const host = location.hostname || "127.0.0.1";
-            wsAuto.value = "ws://" + host + ":8889";
+            const proto = location.protocol === "https:" ? "wss:" : "ws:";
+            const base = location.host || "127.0.0.1:8080";
+            wsAuto.value = proto + "//" + base + "/ws/";
         }
 
         state.messages.set("__public__", []);
@@ -1300,12 +1303,11 @@
      * 规则：ws://ip:PORT → http://ip:(PORT+1)  (服务端 WS_PORT + 1 = HTTP_API_PORT)
      */
     function getApiBase() {
-        const wsSel = document.getElementById("wsUrl");
-        const wsUrl = wsSel ? wsSel.value : "ws://127.0.0.1:8889";
-        try {
-            const u = new URL(wsUrl);
-            const port = (parseInt(u.port || "8889", 10) + 1);
-            return `http://${u.hostname}:${port}`;
+            // 直接用当前页面同协议 + 相对路径 /api/
+            // Nginx 反代会把 /api/ 转发到后端 8890
+            const proto = location.protocol;
+            const base = location.host;
+            return `${proto}//${base}/api`;
         } catch (e) {
             return "http://127.0.0.1:8890";
         }

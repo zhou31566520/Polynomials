@@ -1,58 +1,30 @@
 name: p2p
 
+# ============================================================
+# 统一入口 Nginx (唯一对外暴露端口: 80 + 443)
+#   /          -> 静态页 p2p_web.html
+#   /ws/       -> WebSocket 信令 (p2p_ws_server:8889)
+#   /api/      -> HTTP API (p2p_ws_server:8890)
+# ============================================================
 services:
-  # ============ 信令服务器 ============
-  p2p-server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
-    image: p2p-server:latest
-    container_name: p2p-server
+  nginx:
+    image: nginx:alpine
+    container_name: p2p-nginx
     restart: unless-stopped
     ports:
-      - "8888:8888"
-    environment:
-      PORT: "8888"
-    healthcheck:
-      test: ["CMD", "python", "-c", "from urllib import request; request.urlopen('http://127.0.0.1:8888/p2p/peers', timeout=3)"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
-    labels:
-      app: p2p
-      role: signal-server
-
- # ============ WebSocket 信令服务器 (浏览器 WebRTC 客户端用) ============
-  p2p-ws-server:
-    build:
-      context: .
-      dockerfile: Dockerfile.ws
-    image: p2p-ws-server:latest
-    container_name: p2p-ws-server
-    restart: unless-stopped
-    ports:
-      - "8889:8889"    # WebSocket 信令
-      - "8890:8890"    # HTTP API（注册/登录）
+      - "80:80"
+      - "443:443"
     volumes:
-      # ★ 改目录挂载，DB 和 journal 文件都在里面，不会丢
-      - ./data:/app/data
-    command: python p2p_ws_server.py
-    environment:
-      TZ: Asia/Shanghai
-    healthcheck:
-      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1',8889)); s.close()"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 3s
-    labels:
-      app: p2p
-      role: ws-signal-server
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/sites-enabled:/etc/nginx/conf.d:ro
+      # SSL 证书 (Caddy 或 certbot 生成的放这里)
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - p2p-web
+      - p2p-ws-server
+    networks:
+      - p2p-net
 
-
-  # ============ 静态文件服务器 (托管 p2p_web.html) ============
-  # 访问方式: http://主 机IP:8080/p2p_web.html  或  http://主 机IP:8080/
   p2p-web:
     build:
       context: .
@@ -60,56 +32,36 @@ services:
     image: p2p-web:latest
     container_name: p2p-web
     restart: unless-stopped
-    ports:
-      - "8080:80"
-    labels:
-      app: p2p
-      role: web-ui
+    # ★ 不对外暴露! 只给 nginx 反代
+    expose:
+      - "80"
+    networks:
+      - p2p-net
 
+  p2p-ws-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.ws
+    image: p2p-ws-server:latest
+    container_name: p2p-ws-server
+    restart: unless-stopped
+    # ★ 不对外暴露! 只给 nginx 反代
+    expose:
+      - "8889"
+      - "8890"
+    volumes:
+      - ./data:/app/data
+    environment:
+      TZ: Asia/Shanghai
+    networks:
+      - p2p-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.settimeout(2); r=s.connect_ex(('127.0.0.1',8889)); s.close(); exit(0 if r==0 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 3s
 
-#
-#  # ============ 客户端 A ============
-#  p2p-client-a:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.client
-#    image: p2p-client:latest
-#    container_name: p2p-client-a
-#    restart: unless-stopped
-#    depends_on:
-#      p2p-server:
-#        condition: service_healthy
-#    ports:
-#      - "9000:9000"
-#    environment:
-#      NODE_NAME: node-A
-#      P2P_PORT: "9000"
-#      SIGNAL_SERVER: http://p2p-server:8888
-#    volumes:
-#      - ./volumes/downloads-a:/app/downloads
-#    labels:
-#      app: p2p
-#      role: client
-#
-#  # ============ 客户端 B ============
-#  p2p-client-b:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile.client
-#    image: p2p-client:latest
-#    container_name: p2p-client-b
-#    restart: unless-stopped
-#    depends_on:
-#      p2p-server:
-#        condition: service_healthy
-#    ports:
-#      - "9001:9000"
-#    environment:
-#      NODE_NAME: node-B
-#      P2P_PORT: "9000"
-#      SIGNAL_SERVER: http://p2p-server:8888
-#    volumes:
-#      - ./volumes/downloads-b:/app/downloads
-#    labels:
-#      app: p2p
-#      role: client
+networks:
+  p2p-net:
+    driver: bridge
