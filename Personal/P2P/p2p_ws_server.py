@@ -304,7 +304,7 @@ async def ws_handler(reader, writer):
                     token = msg.get("token", "")
                     nick = msg.get("nickname", "")
                     if not token or not _is_token_valid(token):
-                        _send_ws_json(writer, {"type": "error", "error": "token 无效或已过期,请重新登录"})
+                        await _send_ws_json(writer, {"type": "error", "error": "token 无效或已过期,请重新登录"})
                         break
                     peer_id = tokens[token]["peer_id"]   # 从带时间戳 dict 取
                     # ★ 不再 pop token! 24h 内有效,允许 WS 重连
@@ -317,18 +317,18 @@ async def ws_handler(reader, writer):
                     reverse_peers[writer] = peer_id
                     log.info(f"✅ 注册 peer={peer_id[:6]} nickname={nickname}")
                     # 回给客户端
-                    _send_ws_json(writer, {"type": "connected", "peer_id": peer_id, "name": nickname})
+                    await _send_ws_json(writer, {"type": "connected", "peer_id": peer_id, "name": nickname})
                     # 广播 peers
-                    _broadcast_peers()
+                    await _broadcast_peers()
                     # 通知其他人
                     for pid, info in clients.items():
                         if pid != peer_id:
-                            _send_ws_json(info["ws"], {"type": "peer_joined", "peer": {"peer_id": peer_id, "name": nickname}})
+                            await _send_ws_json(info["ws"], {"type": "peer_joined", "peer": {"peer_id": peer_id, "name": nickname}})
 
                 elif msg.get("type") == "ping":
                     if peer_id and peer_id in clients:
                         clients[peer_id]["last_ping"] = time.time()
-                    _send_ws_json(writer, {"type": "pong"})
+                    await _send_ws_json(writer, {"type": "pong"})
 
                 elif msg.get("type") == "leave":
                     break
@@ -336,20 +336,20 @@ async def ws_handler(reader, writer):
                 elif msg.get("type") == "signal":
                     to = msg.get("to", "")
                     if to in clients:
-                        _send_ws_json(clients[to]["ws"], {
+                        await _send_ws_json(clients[to]["ws"], {
                             "type": "signal", "from": peer_id, "from_name": clients[peer_id]["nickname"],
                             "to": to, "to_name": clients[to]["nickname"],
                             "payload": msg.get("payload", {}),
                         })
                     else:
-                        _send_ws_json(writer, {"type": "signal_error", "error": "对端不在线"})
+                        await _send_ws_json(writer, {"type": "signal_error", "error": "对端不在线"})
 
                 elif msg.get("type") == "chat":
                     """私聊中继 (P2P DataChannel 降级时走这里)"""
                     to = msg.get("to", "")
                     payload = msg.get("payload", {})
                     if to in clients:
-                        _send_ws_json(clients[to]["ws"], {
+                        await _send_ws_json(clients[to]["ws"], {
                             "type": "chat",
                             "from": peer_id,
                             "from_name": clients[peer_id]["nickname"],
@@ -357,17 +357,26 @@ async def ws_handler(reader, writer):
                         })
 
                 elif msg.get("type") == "broadcast":
-                    """公聊中继"""
                     payload = msg.get("payload", {})
+                    kind = payload.get("kind", "text")
+                    has_image = "image" in payload
+                    payload_size = len(json.dumps(payload, ensure_ascii=False))
+                    log.info(f"📣 broadcast 收到 kind={kind} has_image={has_image} size={payload_size}B 发送者={clients[peer_id]['nickname']}")
+                    forward_count = 0
                     for pid, info in clients.items():
                         if pid != peer_id:
-                            _send_ws_json(info["ws"], {
-                                "type": "chat",
-                                "from": peer_id,
-                                "from_name": clients[peer_id]["nickname"],
-                                "payload": payload,
-                                "broadcast": True,
-                            })
+                            try:
+                                await _send_ws_json(info["ws"], {
+                                    "type": "chat",
+                                    "from": peer_id,
+                                    "from_name": clients[peer_id]["nickname"],
+                                    "payload": payload,
+                                    "broadcast": True,
+                                })
+                                forward_count += 1
+                            except Exception as ex:
+                                log.error(f"broadcast 转发给 {pid[:8]} 失败: {ex}")
+                    log.info(f"📣 broadcast 已转发给 {forward_count} 个 peer")
 
     except asyncio.TimeoutError:
         log.warning(f"连接 {address} 超时")
@@ -376,25 +385,25 @@ async def ws_handler(reader, writer):
     finally:
         if peer_id:
             cleanup_client(peer_id, "连接断开")
-            _broadcast_peers()
+            await _broadcast_peers()
             for pid, info in clients.items():
-                _send_ws_json(info["ws"], {"type": "peer_left", "peer_id": peer_id})
+                await _send_ws_json(info["ws"], {"type": "peer_left", "peer_id": peer_id})
         try: writer.close(); await writer.wait_closed()
         except: pass
 
-def _broadcast_peers():
+async def _broadcast_peers():
     peers_list = [{"peer_id": pid, "name": info["nickname"]} for pid, info in clients.items()]
     for pid, info in clients.items():
-        _send_ws_json(info["ws"], {"type": "peers", "peers": peers_list})
+        await _send_ws_json(info["ws"], {"type": "peers", "peers": peers_list})
 
-def _send_ws_json(writer, obj: dict):
+async def _send_ws_json(writer, obj: dict):
     try:
         payload = json.dumps(obj, ensure_ascii=False).encode()
         frame = _make_ws_frame(payload)
         writer.write(frame)
-    except: pass
-    try: asyncio.get_event_loop().run_in_executor(None, writer.drain)
-    except: pass
+        await writer.drain()
+    except Exception:
+        pass
 
 def _make_ws_frame(payload: bytes) -> bytes:
     # 简单的 unmasked server frame（浏览器客户端屏蔽掩码位不处理）
@@ -469,8 +478,8 @@ async def heartbeat_check():
                 except: pass
                 cleanup_client(pid, "心跳超时")
                 for other_pid, other_info in clients.items():
-                    _send_ws_json(other_info["ws"], {"type": "peer_left", "peer_id": pid})
-                _broadcast_peers()
+                    await _send_ws_json(other_info["ws"], {"type": "peer_left", "peer_id": pid})
+                await _broadcast_peers()
 
 # ==================== 启动 ====================
 
