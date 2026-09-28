@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -152,10 +152,13 @@
             flex: 1;
             display: flex;
             overflow: hidden;
+            /* flex 子元素允许收缩到内容以下 —— 移动端滚动必加 */
+            min-height: 0;
         }
 
         .left {
             width: 220px;
+            flex-shrink: 0;          /* 桌面端不被挤压 */
             background: #fff;
             border-right: 1px solid #e5e7eb;
             display: flex;
@@ -210,6 +213,9 @@
             display: flex;
             flex-direction: column;
             background: #fff;
+            /* flex 子元素允许收缩 */
+            min-width: 0;
+            min-height: 0;
         }
 
         .chat-header {
@@ -237,7 +243,10 @@
         .messages {
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 14px;
+            /* flex 子元素允许收缩 —— 让 input-area 不被挤出 */
+            min-height: 0;
         }
 
         .msg {
@@ -300,11 +309,15 @@
 
         .input-area {
             padding: 10px 14px;
+            /* iPhone 底部安全区 (home indicator) */
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 8px;
             align-items: flex-end;
             background: #fff;
+            /* 关键! 不让 flex 挤压这个区域, 保证按钮可见 */
+            flex-shrink: 0;
         }
 
         .input-area textarea {
@@ -372,6 +385,86 @@
             background: #f3f4f6;
             color: #6b7280;
         }
+
+        /* 桌面端默认隐藏汉堡按钮 */
+        .toolbar .menu-toggle {
+            display: none;
+        }
+        /* ============================================
+           移动端适配 (宽度 < 768px)
+           ============================================ */
+        @media (max-width: 768px) {
+            .toolbar {
+                padding: 8px 12px;
+                gap: 6px;
+            }
+            /* 汉堡菜单按钮 — 移动端显示 */
+            .toolbar .menu-toggle {
+                display: inline-flex;
+                width: 32px;
+                height: 32px;
+                align-items: center;
+                justify-content: center;
+                background: #f3f4f6;
+                border-radius: 6px;
+                font-size: 18px;
+                cursor: pointer;
+                user-select: none;
+            }
+            /* 左侧栏 = 抽屉 */
+            .left {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                width: calc(100vw - 60px);
+                max-width: 320px;
+                z-index: 100;
+                transform: translateX(-100%);
+                transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+            }
+            .left.open {
+                transform: translateX(0);
+            }
+            /* 遮罩层 */
+            .drawer-mask {
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 99;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.25s;
+            }
+            .drawer-mask.show {
+                opacity: 1;
+                visibility: visible;
+            }
+            .messages {
+                padding: 10px;
+            }
+            .msg .bubble {
+                font-size: 15px;
+                max-width: 85%;
+            }
+            /* 输入区: 关键! 保证完整显示 */
+            .input-area {
+                padding: 8px 10px;
+                padding-bottom: calc(8px + env(safe-area-inset-bottom));
+                gap: 6px;
+            }
+            .input-area textarea {
+                font-size: 16px;    /* 16px 防止 iOS 聚焦时放大页面 */
+                min-height: 36px;
+            }
+            .input-area button {
+                padding: 8px 14px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+        }
     </style>
 </head>
 <body>
@@ -416,6 +509,8 @@
     </div>
 </div>
 <div class="toolbar">
+    <!-- 汉堡菜单 (CSS 控制移动端显示/隐藏) -->
+    <span class="menu-toggle" id="menuToggle" onclick="toggleDrawer()">☰</span>
     <span class="dot" id="onlineDot" style="background:#9ca3af;"></span>
     <span id="myNameDisplay" style="font-size:14px;font-weight:600;color:#1f2937;">未登录</span>
     <button id="btnLogin" onclick="showAuthModal('login')" style="margin-left:auto;padding:6px 18px;border:1px solid #3b82f6;background:#fff;color:#3b82f6;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">登录</button>
@@ -426,6 +521,8 @@
         <option id="wsAuto" value=""></option>
     </select>
 </div>
+<!-- 抽屉遮罩 (移动端) -->
+<div class="drawer-mask" id="drawerMask" onclick="toggleDrawer(false)"></div>
 <div class="main">
     <div class="left">
         <h3>在线成员 (<span id="peerCount">0</span>)</h3>
