@@ -569,15 +569,34 @@
     };
 
     const CONFIG = {
-        // ★ 换国内可用 STUN（Google 被 GFW 拦了！）
         ICE_SERVERS: [
-            {urls: ["stun:stun.miwifi.com:3478"]},              // 小米
-            {urls: ["stun:stun.chat.bilibili.com:3478"]},       // B站
-            {urls: ["stun:stun.qq.com:3478"]},                  // 腾讯
-            // 如果以后部署到海外环境再放开 Google：
-            // { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+            {urls: ["stun:stun.miwifi.com:3478"]},
+            {urls: ["stun:stun.chat.bilibili.com:3478"]},
+            {urls: ["stun:stun.qq.com:3478"]},
         ],
+        ICE_TRANSPORT_POLICY: "all",
     };
+
+    // 页面加载后从后端拉取 TURN 动态凭证
+    async function loadTurnCredentials() {
+        try {
+            const base = location.protocol === "https:" ? "https://" : "http://";
+            const resp = await fetch(base + location.host + "/api/turn", {
+                credentials: "omit",
+                cache: "no-store",
+            });
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            if (data && data.turn && data.turn.length) {
+                CONFIG.ICE_SERVERS.push(...data.turn);
+                log("✅ TURN 凭证已加载:", data.turn.length, "个服务器");
+                return data.turn;
+            }
+        } catch (e) {
+            warn("⚠️ TURN 凭证拉取失败 (无 TURN 服务器时可忽略):", e.message);
+        }
+        return null;
+    }
 
     // ==================== 工具 ====================
     const DEBUG = true;
@@ -613,7 +632,10 @@
     });
 
     // ==================== UI 初始化 ====================
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+        // ⭐ 先加载 TURN 凭证 (5G/对称 NAT 穿透必须)
+        await loadTurnCredentials();
+
         // 自动推导 WebSocket 地址: 跟当前页面同协议 + 相对路径 /ws/
         // 部署在 Nginx 后面时: https://xxx.com -> wss://xxx.com/ws/
         // 本地开发时:            http://localhost:8080 -> ws://localhost:8080/ws/

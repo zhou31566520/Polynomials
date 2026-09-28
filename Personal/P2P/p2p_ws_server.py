@@ -9,7 +9,9 @@ P2P WebRTC 信令服务器（WebSocket）
 """
 
 import asyncio
+import base64
 import hashlib
+import hmac
 import json
 import os
 import secrets
@@ -24,6 +26,45 @@ import socketserver
 # ==================== 配置 ====================
 HOST = "0.0.0.0"
 WS_PORT = 8889
+
+# ★ TURN 服务器配置 (从环境变量读, 没配就不启用)
+# 静态模式 (long-term credential):
+#   TURN_SERVER=turn:your.ecs.ip:3478?transport=tcp
+#   TURN_USERNAME=p2p
+#   TURN_PASSWORD=YourStrongPassword123
+#
+# REST API 模式 (临时凭证, 更安全):
+#   TURN_SERVER=turn:your.ecs.ip:3478?transport=tcp
+#   TURN_SECRET=Coturn fingerprint 密钥
+#   (Coturn 配置文件要加 fingerprint)
+TURN_SERVER = os.environ.get("TURN_SERVER", "")
+TURN_USERNAME = os.environ.get("TURN_USERNAME", "")
+TURN_PASSWORD = os.environ.get("TURN_PASSWORD", "")
+TURN_SECRET = os.environ.get("TURN_SECRET", "")
+TURN_TTL = int(os.environ.get("TURN_TTL", "600"))   # 临时凭证有效期秒
+
+def _gen_turn_credentials():
+    """生成 TURN 凭证, 没配置返回 []"""
+    if not TURN_SERVER:
+        return []
+    turn_urls = [TURN_SERVER]
+    if TURN_SERVER.startswith("turn:"):
+        tls_url = TURN_SERVER.replace("turn:", "turns:").replace(":3478", ":5349").replace("?transport=tcp", "?transport=tls")
+        if tls_url != TURN_SERVER:
+            turn_urls.append(tls_url)
+
+    if TURN_SECRET:
+        # REST API: 临时凭证
+        ts = int(time.time()) + TURN_TTL
+        username = f"{ts}:p2p"
+        mac = hmac.new(TURN_SECRET.encode(), username.encode(), hashlib.sha1).digest()
+        password = base64.b64encode(mac).decode()
+        return [{"urls": turn_urls, "username": username, "credential": password}]
+    elif TURN_USERNAME and TURN_PASSWORD:
+        # 静态: long-term
+        return [{"urls": turn_urls, "username": TURN_USERNAME, "credential": TURN_PASSWORD}]
+    else:
+        return []
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 os.makedirs(DATA_DIR, exist_ok=True)   # ★ 确保目录存在
 DB_PATH = os.path.join(DATA_DIR, "p2p_users.db")
@@ -177,11 +218,18 @@ class HTTPHandler(BaseHTTPRequestHandler):
         self._send_json(200, {})
 
     def do_GET(self):
-        # 健康检查
-        if self.path in ("/", "/health", "/ping"):
+        path = self.path.split("?")[0]
+        if path in ("/", "/health", "/ping"):
             self._send_json(200, {"status": "ok", "clients": len(clients)})
-            return
-        self._send_json(404, {"error": "not found"})
+        elif path == "/api/turn":
+            turn_list = _gen_turn_credentials()
+            self._send_json(200, {"turn": turn_list, "stun": [
+                "stun:stun.miwifi.com:3478",
+                "stun:stun.chat.bilibili.com:3478",
+                "stun:stun.qq.com:3478",
+            ]})
+        else:
+            self._send_json(404, {"error": "not found"})
 
     def do_POST(self):
         try:
