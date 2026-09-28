@@ -1308,9 +1308,6 @@
             const proto = location.protocol;
             const base = location.host;
             return `${proto}//${base}/api`;
-        } catch (e) {
-            return "http://127.0.0.1:8890";
-        }
     }
 
     let authMode = "login";
