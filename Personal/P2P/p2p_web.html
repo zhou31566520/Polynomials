@@ -430,17 +430,17 @@
             }
             /* 遮罩层 */
             .drawer-mask {
+                display: none;
                 position: fixed;
                 inset: 0;
                 background: rgba(0,0,0,0.4);
                 z-index: 99;
                 opacity: 0;
-                visibility: hidden;
                 transition: opacity 0.25s;
             }
             .drawer-mask.show {
+                display: block;
                 opacity: 1;
-                visibility: visible;
             }
             .messages {
                 padding: 10px;
@@ -593,6 +593,24 @@
     function err(...args) {
         console.error("[P2P]", ...args);
     }
+
+    // ==================== 移动端抽屉 ====================
+    function toggleDrawer(force) {
+        const left = document.querySelector(".left");
+        const mask = document.getElementById("drawerMask");
+        if (!left) return;
+        const willOpen = typeof force === "boolean" ? force : !left.classList.contains("open");
+        left.classList.toggle("open", willOpen);
+        if (mask) mask.classList.toggle("show", willOpen);
+    }
+
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) toggleDrawer(false);
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") toggleDrawer(false);
+    });
 
     // ==================== UI 初始化 ====================
     document.addEventListener("DOMContentLoaded", () => {
