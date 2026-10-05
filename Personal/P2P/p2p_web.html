@@ -1,8 +1,9 @@
-﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>P2P 聊天室 · WebRTC</title>
     <style>
         /* 红点角标 */
@@ -101,53 +102,6 @@
             font-weight: 500;
         }
 
-        .btn-primary {
-            background: #3b82f6;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .btn-primary:disabled {
-            background: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .status {
-            margin-left: auto;
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .status .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #9ca3af;
-            margin-right: 6px;
-        }
-
-        .status.connected .dot {
-            background: #10b981;
-        }
-
-        .status.connected {
-            color: #10b981;
-            font-weight: 500;
-        }
-
         .main {
             flex: 1;
             display: flex;
@@ -158,7 +112,7 @@
 
         .left {
             width: 220px;
-            flex-shrink: 0;          /* 桌面端不被挤压 */
+            flex-shrink: 0; /* 桌面端不被挤压 */
             background: #fff;
             border-right: 1px solid #e5e7eb;
             display: flex;
@@ -227,19 +181,6 @@
             font-size: 14px;
         }
 
-        .chat-header .tab {
-            padding: 4px 10px;
-            border-radius: 14px;
-            background: #f3f4f6;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .chat-header .tab.active {
-            background: #3b82f6;
-            color: #fff;
-        }
-
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -300,11 +241,6 @@
             font-size: 12px;
             padding: 4px 10px;
             border-radius: 12px;
-        }
-
-        .msg.file .bubble a {
-            color: inherit;
-            text-decoration: underline;
         }
 
         .input-area {
@@ -376,7 +312,7 @@
             color: #065f46;
         }
 
-        .conn-badge.waiting {
+        .conn-badge.connecting {
             background: #fef3c7;
             color: #92400e;
         }
@@ -390,6 +326,7 @@
         .toolbar .menu-toggle {
             display: none;
         }
+
         /* ============================================
            移动端适配 (宽度 < 768px)
            ============================================ */
@@ -398,6 +335,7 @@
                 padding: 8px 12px;
                 gap: 6px;
             }
+
             /* 汉堡菜单按钮 — 移动端显示 */
             .toolbar .menu-toggle {
                 display: inline-flex;
@@ -411,6 +349,7 @@
                 cursor: pointer;
                 user-select: none;
             }
+
             /* 左侧栏 = 抽屉 */
             .left {
                 position: fixed;
@@ -422,43 +361,51 @@
                 max-width: 320px;
                 z-index: 100;
                 transform: translateX(-100%);
-                transition: transform 0.28s cubic-bezier(.4,0,.2,1);
-                box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+                transition: transform 0.28s cubic-bezier(.4, 0, .2, 1);
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
             }
+
             .left.open {
                 transform: translateX(0);
             }
+
             /* 遮罩层 */
             .drawer-mask {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,0.4);
+                background: rgba(0, 0, 0, 0.4);
                 z-index: 99;
                 opacity: 0;
                 transition: opacity 0.25s;
             }
+
             .drawer-mask.show {
                 display: block;
                 opacity: 1;
             }
+
             .messages {
                 padding: 10px;
             }
+
             .msg .bubble {
                 font-size: 15px;
                 max-width: 85%;
             }
+
             /* 输入区: 关键! 保证完整显示 */
             .input-area {
                 padding: 8px 10px;
                 padding-bottom: calc(8px + env(safe-area-inset-bottom));
                 gap: 6px;
             }
+
             .input-area textarea {
-                font-size: 16px;    /* 16px 防止 iOS 聚焦时放大页面 */
+                font-size: 16px; /* 16px 防止 iOS 聚焦时放大页面 */
                 min-height: 36px;
             }
+
             .input-area button {
                 padding: 8px 14px;
                 font-size: 13px;
@@ -474,7 +421,10 @@
     <div style="background:#fff;border-radius:14px;padding:28px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.25);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <h2 id="authTitle" style="margin:0;font-size:20px;color:#1f2937;">🔐 注册 / 登录</h2>
-            <button onclick="hideAuthModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;padding:0 4px;line-height:1;">✕</button>
+            <button onclick="hideAuthModal()"
+                    style="background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;padding:0 4px;line-height:1;">
+                ✕
+            </button>
         </div>
 
         <div style="display:flex;gap:6px;margin-bottom:16px;">
@@ -513,8 +463,14 @@
     <span class="menu-toggle" id="menuToggle" onclick="toggleDrawer()">☰</span>
     <span class="dot" id="onlineDot" style="background:#9ca3af;"></span>
     <span id="myNameDisplay" style="font-size:14px;font-weight:600;color:#1f2937;">未登录</span>
-    <button id="btnLogin" onclick="showAuthModal('login')" style="margin-left:auto;padding:6px 18px;border:1px solid #3b82f6;background:#fff;color:#3b82f6;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">登录</button>
-    <button id="btnLogout" onclick="logout()" style="margin-left:auto;padding:6px 18px;border:1px solid #ef4444;background:#fff;color:#ef4444;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;display:none;">登出</button>
+    <button id="btnLogin" onclick="showAuthModal('login')"
+            style="margin-left:auto;padding:6px 18px;border:1px solid #3b82f6;background:#fff;color:#3b82f6;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;">
+        登录
+    </button>
+    <button id="btnLogout" onclick="logout()"
+            style="margin-left:auto;padding:6px 18px;border:1px solid #ef4444;background:#fff;color:#ef4444;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;display:none;">
+        登出
+    </button>
     <!-- 隐藏的保留项: JS 还需要读 wsUrl 和 myName -->
     <input id="myName" value="" style="display:none">
     <select id="wsUrl" style="display:none">
@@ -547,7 +503,6 @@
         </div>
     </div>
 </div>
-<!-- 完整文件内容（只列改动部分，其他保持不变）-->
 <script>
     // ==================== 全局状态 ====================
     const state = {
@@ -557,16 +512,112 @@
         token: localStorage.getItem("p2p_token") || null,
         nickname: localStorage.getItem("p2p_nickname") || null,
         username: localStorage.getItem("p2p_username") || null,
-        peers: new Map(),                  // peer_id -> {name}
+        peers: new Map(),                  // peer_id -> {name, source: "server"|"gossip"|"cache", online: true|false}
         connections: new Map(),            // peer_id -> RTCPeerConnection
         dataChannels: new Map(),           // peer_id -> chat DataChannel
-        gossipChannels: new Map(),         // peer_id -> gossip DataChannel  ★ 新增
-        reconnectTimer: null,              // ★ WS 重连定时器
+        gossipChannels: new Map(),         // peer_id -> gossip DataChannel
+        reconnectTimer: null,
         activeTab: "__public__",
         messages: new Map(),
         unreadCounts: new Map(),
         heartbeatTimer: null,
+        // 新增：本地缓存 & 降级模式
+        peersCache: new Map(),             // peer_id -> {name, first_seen, last_seen, source}
+        signalingFallback: false,          // 是否处于信令降级模式
+        wsConnectAttempts: 0,              // WS 连接尝试次数（用于指数退避）
+        wsConnectTimeout: null,            // WS 连接超时定时器
     };
+
+    // ==================== 本地节点缓存 (LocalStorage) ====================
+    const PEERS_CACHE_KEY = "p2p_peers_cache";
+    const PEER_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;  // 7 天过期
+
+    // 启动时从 localStorage 恢复已知节点（带 7 天 TTL 过期过滤）
+    function loadPeersCache() {
+        try {
+            const raw = localStorage.getItem(PEERS_CACHE_KEY);
+            if (!raw) return;
+            const arr = JSON.parse(raw);
+            const now = Date.now();
+            arr.forEach(c => {
+                if (c.peer_id && (now - (c.last_seen || 0) < PEER_CACHE_TTL)) {
+                    state.peersCache.set(c.peer_id, {
+                        name: c.name,
+                        first_seen: c.first_seen || c.last_seen || now,
+                        last_seen: c.last_seen || now,
+                        source: c.source || "cache",
+                    });
+                }
+            });
+            log(`💾 从本地缓存恢复 ${state.peersCache.size} 个节点`);
+        } catch (e) {
+            warn("⚠️ 读取本地节点缓存失败:", e.message);
+            state.peersCache.clear();
+        }
+    }
+
+    function savePeersCache() {
+        try {
+            const now = Date.now();
+            // 合并 peers（在线列表）到 peersCache
+            state.peers.forEach((info, pid) => {
+                const existing = state.peersCache.get(pid);
+                state.peersCache.set(pid, {
+                    name: info.name || existing?.name || "?",
+                    first_seen: existing?.first_seen || now,
+                    last_seen: now,
+                    source: info.source || existing?.source || "gossip",
+                });
+            });
+            const arr = [...state.peersCache.entries()].map(([pid, info]) => ({
+                peer_id: pid, ...info,
+            }));
+            localStorage.setItem(PEERS_CACHE_KEY, JSON.stringify(arr));
+            log(`💾 已保存 ${state.peersCache.size} 个节点到本地缓存`);
+        } catch (e) {
+            warn("⚠️ 保存本地节点缓存失败:", e.message);
+        }
+    }
+
+    function savePeerToCache(peerId, name, source) {
+        const now = Date.now();
+        const existing = state.peersCache.get(peerId);
+        state.peersCache.set(peerId, {
+            name: name || existing?.name || "?",
+            first_seen: existing?.first_seen || now,
+            last_seen: now,
+            source: source || existing?.source || "gossip",
+        });
+    }
+
+    function flushPeerCache() {
+        savePeersCache();
+    }
+
+    // ==================== 信令降级模式 ====================
+    function enterSignalingFallback() {
+        if (state.signalingFallback) return;
+        state.signalingFallback = true;
+        log("⚠️ 进入信令降级模式 — 使用本地缓存节点");
+        // 用缓存填充 peers 列表（标记为离线/缓存来源）
+        state.peersCache.forEach((info, pid) => {
+            if (!state.peers.has(pid)) {
+                state.peers.set(pid, {name: info.name, source: "cache", online: false});
+            }
+        });
+        renderPeerList();
+        setStatus(false, `⚠️ 信令服务器离线（已加载 ${state.peersCache.size} 个本地节点）`);
+        logSys(`⚠️ 信令服务器离线，已加载 ${state.peersCache.size} 个本地缓存节点`);
+    }
+
+    function exitSignalingFallback() {
+        if (!state.signalingFallback) return;
+        state.signalingFallback = false;
+        state.wsConnectAttempts = 0;
+        log("✅ 退出信令降级模式 — 信令服务器已恢复");
+        setStatus(true, `信令服务器已恢复 ${state.myPeerId?.slice(0, 6) || ""}`);
+        logSys("✅ 信令服务器已恢复");
+    }
 
     const CONFIG = {
         ICE_SERVERS: [
@@ -636,6 +687,9 @@
         // ⭐ 先加载 TURN 凭证 (5G/对称 NAT 穿透必须)
         await loadTurnCredentials();
 
+        // 启动时加载本地节点缓存
+        loadPeersCache();
+
         // 自动推导 WebSocket 地址: 跟当前页面同协议 + 相对路径 /ws/
         // 部署在 Nginx 后面时: https://xxx.com -> wss://xxx.com/ws/
         // 本地开发时:            http://localhost:8080 -> ws://localhost:8080/ws/
@@ -647,7 +701,6 @@
         }
 
         state.messages.set("__public__", []);
-        // btnConnect/btnDisconnect 已移除, 登录/登出按钮在 toolbar 右侧
         document.getElementById("sendBtn").onclick = sendCurrent;
         document.getElementById("fileBtn").onclick = () => document.getElementById("fileInput").click();
         document.getElementById("fileInput").onchange = handleFileSelect;
@@ -674,6 +727,14 @@
         } else {
             document.getElementById("btnLogin").style.display = "";
             document.getElementById("btnLogout").style.display = "none";
+            // 无 token 但有缓存 → 也展示一下缓存的节点
+            if (state.peersCache.size > 0) {
+                state.peersCache.forEach((info, pid) => {
+                    state.peers.set(pid, {name: info.name, source: "cache", online: false});
+                });
+                renderPeerList();
+                setStatus(false, `已加载 ${state.peersCache.size} 个本地缓存节点（未登录）`);
+            }
         }
     });
 
@@ -686,7 +747,7 @@
         document.getElementById("authModal").style.display = "none";
     }
 
-// ★ 新增：用户切回标签页/窗口时立即续命
+    // 新增：用户切回标签页/窗口时立即续命
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden) {
             // 刚切回来，立即发一个 ping + 检查 WS 状态
@@ -746,7 +807,7 @@
             if (state.ws && state.ws.readyState === WebSocket.OPEN) {
                 state.ws.send(JSON.stringify({type: "ping"}));
             }
-        }, 5000);   // ★ 5 秒一次，对抗浏览器后台节流
+        }, 5000);   // 5 秒一次，对抗浏览器后台节流
     }
 
     function stopHeartbeat() {
@@ -757,11 +818,16 @@
     }
 
     // ==================== WebSocket 信令 ====================
+    const WS_CONNECT_TIMEOUT = 5000;   // 5 秒连接超时
+    const WS_MAX_BACKOFF = 60000;      // 最大 60 秒退避
+
     function doConnect() {
         const url = document.getElementById("wsUrl").value.trim();
         const name = document.getElementById("myName").value.trim() || "web-user";
         state.myName = name;
         stopHeartbeat();
+        // 主动断开时也保存节点缓存（节流持久化）
+        schedulePeerCacheFlush();
         if (state.ws) {
             try {
                 state.ws.close();
@@ -770,14 +836,42 @@
             state.ws = null;
         }
 
-        log("WS 连接:", url, "名字:", name);
+        log("WS 连接:", url, "名字:", name, "尝试 #", state.wsConnectAttempts + 1);
         setStatus(false, "连接信令服务器...");
-        state.ws = new WebSocket(url);
+
+        // 连接超时保护
+        let connected = false;
+        state.wsConnectTimeout = setTimeout(() => {
+            if (!connected) {
+                log("⏰ WS 连接超时，进入降级模式");
+                try {
+                    state.ws.close();
+                } catch {
+                }
+                state.ws = null;
+                enterSignalingFallback();
+            }
+        }, WS_CONNECT_TIMEOUT);
+
+        try {
+            state.ws = new WebSocket(url);
+        } catch (e) {
+            err("❌ 创建 WebSocket 失败:", e);
+            clearTimeout(state.wsConnectTimeout);
+            state.wsConnectTimeout = null;
+            enterSignalingFallback();
+            return;
+        }
 
         state.ws.onopen = () => {
+            connected = true;
+            clearTimeout(state.wsConnectTimeout);
+            state.wsConnectTimeout = null;
+            state.wsConnectAttempts = 0;  // 重置重试计数
             log("✅ WS onopen — 注册中...");
             state.ws.send(JSON.stringify({type: "register", token: state.token, nickname: state.nickname}));
             startHeartbeat();
+            exitSignalingFallback();  // 连接成功，退出降级模式
         };
         state.ws.onmessage = (ev) => {
             let msg;
@@ -794,10 +888,14 @@
         };
         state.ws.onclose = (e) => {
             log("🔌 WS 关闭 code=", e.code, "reason=", e.reason);
+            clearTimeout(state.wsConnectTimeout);
+            state.wsConnectTimeout = null;
             stopHeartbeat();
             state.ws = null;
 
-            // ★ P2P DataChannel 保持！不清！
+            // 保存节点缓存（断开时）
+            schedulePeerCacheFlush();
+
             const peerCount = state.dataChannels.size;
             log(`💡 信令服务器断开，但保持 ${peerCount} 条 P2P DataChannel 继续工作`);
 
@@ -805,13 +903,21 @@
                 ? `信令断开 (${peerCount} 条 P2P 直连仍可用)`
                 : "信令服务器断开");
 
-            // 如果不是用户主动断开，尝试重连（带原 token 去试，试失败 error handler 会清）
+            // 如果不是用户主动断开，指数退避重连
             if (state.token) {
-                log("🔄 尝试重连信令服务器... (token=" + state.token.slice(0, 8) + "...)");
+                state.wsConnectAttempts++;
+                const backoff = Math.min(
+                    2000 * Math.pow(2, Math.min(state.wsConnectAttempts - 1, 5)),
+                    WS_MAX_BACKOFF
+                );
+                log(`🔄 重连信令服务器... 尝试 #${state.wsConnectAttempts}, 等待 ${backoff}ms`);
                 if (state.reconnectTimer) clearTimeout(state.reconnectTimer);
-                state.reconnectTimer = setTimeout(doConnect, 2000);  // 2 秒更快响应
+                state.reconnectTimer = setTimeout(doConnect, backoff);
+                // 多次失败后也进入降级模式
+                if (state.wsConnectAttempts >= 2) {
+                    enterSignalingFallback();
+                }
             } else {
-                // 没 token 说明 error handler 已经清过了 —— 不自动弹框, 只切按钮
                 document.getElementById("btnLogin").style.display = "";
                 document.getElementById("btnLogout").style.display = "none";
             }
@@ -825,7 +931,13 @@
             clearTimeout(state.reconnectTimer);
             state.reconnectTimer = null;
         }
+        if (state.wsConnectTimeout) {
+            clearTimeout(state.wsConnectTimeout);
+            state.wsConnectTimeout = null;
+        }
         stopHeartbeat();
+        // 主动断开时也保存节点缓存
+        schedulePeerCacheFlush();
         if (state.ws) {
             try {
                 state.ws.send(JSON.stringify({type: "leave"}));
@@ -837,7 +949,11 @@
             }
             state.ws = null;
         }
-        // ★ P2P DataChannel 保持！用户主动断开信令 ≠ 要关掉 P2P
+        state.wsConnectAttempts = 0;
+        // 清除降级模式（用户主动断开不算降级）
+        if (state.signalingFallback) {
+            state.signalingFallback = false;
+        }
         setStatus(false, state.dataChannels.size > 0
             ? `已手动断开信令 (${state.dataChannels.size} 条 P2P 仍在)`
             : "已断开");
@@ -859,18 +975,25 @@
             }
             case "peers": {
                 log("📋 peer 列表:", msg.peers.length, "个");
-                renderPeerList(msg.peers);
-                // ★ 自动给所有已存在的 peer 预建连接（方便公共聊天室广播）
+                state.peers.clear();
+                msg.peers.forEach(p => {
+                    state.peers.set(p.peer_id, {name: p.name, source: "server", online: true});
+                    savePeerToCache(p.peer_id, p.name, "server");
+                });
+                schedulePeerCacheFlush();  // 收到完整列表后节流持久化
+                renderPeerList();
+                // 自动给所有已存在的 peer 预建连接
                 msg.peers.forEach(p => ensureConnection(p.peer_id));
                 break;
             }
             case "peer_joined": {
                 const {peer_id, name} = msg.peer;
                 log("🟢 新 peer 上线:", name, peer_id);
-                state.peers.set(peer_id, {name});
+                state.peers.set(peer_id, {name, source: "server", online: true});
+                savePeerToCache(peer_id, name, "server");
                 renderPeerList();
                 logSys(`🟢 ${name} (${peer_id.slice(0, 6)}) 上线`);
-                ensureConnection(peer_id);  // ★ 有人上线就主动建连接
+                ensureConnection(peer_id);
                 break;
             }
             case "peer_left": {
@@ -878,6 +1001,11 @@
                 log("🔴 peer 下线:", msg.peer_id);
                 closePeerConnection(msg.peer_id);
                 state.peers.delete(msg.peer_id);
+                // 离线时也更新缓存（标记但不删除，保留历史记录）
+                const existingCache = state.peersCache.get(msg.peer_id);
+                if (existingCache) {
+                    existingCache.last_seen = Date.now();
+                }
                 renderPeerList();
                 if (state.activeTab === msg.peer_id) selectPeer("__public__");
                 if (info) logSys(`🔴 ${info.name} 离线`);
@@ -892,7 +1020,7 @@
                 warn("⚠️ 对端离线 signal_error:", msg);
                 break;
             }
-            // ★ WS 消息中继 (P2P 降级)
+            // WS 消息中继 (P2P 降级)
             case "chat": {
                 const fromId = msg.from;
                 const fromName = msg.from_name || fromId?.slice(0, 6);
@@ -926,7 +1054,7 @@
                 }
                 break;
             }
-            // ★ 新增：服务端认证错误 → 弹登录框
+            // 新增：服务端认证错误 → 弹登录框
             case "error": {
                 err("❌ 服务端错误:", msg.error);
                 if (msg.error && msg.error.includes("token")) {
@@ -956,29 +1084,66 @@
     function renderPeerList(peersFromServer) {
         if (peersFromServer) {
             state.peers.clear();
-            peersFromServer.forEach(p => state.peers.set(p.peer_id, {name: p.name}));
+            peersFromServer.forEach(p => state.peers.set(p.peer_id, {name: p.name, source: "server", online: true}));
         }
         const listDiv = document.getElementById("peerList");
-        listDiv.innerHTML = "";   // ★ 先清空
+        listDiv.innerHTML = "";
 
-        // ★ 统一重建：公共聊天室 + 所有 peer，每个元素都有全新 onclick
+        // 先放在线的，再放离线的（缓存来源的放最后）
+        const sortedPeers = [...state.peers.entries()].sort((a, b) => {
+            const infoA = a[1], infoB = b[1];
+            const aScore = (infoA.online !== false ? 2 : 0) + (infoA.source === "server" ? 1 : 0);
+            const bScore = (infoB.online !== false ? 2 : 0) + (infoB.source === "server" ? 1 : 0);
+            return bScore - aScore;
+        });
+
         listDiv.appendChild(createPeerItem("__public__", "💬 公共聊天室"));
-        state.peers.forEach((info, pid) => {
-            listDiv.appendChild(createPeerItem(pid, info.name));
+        sortedPeers.forEach(([pid, info]) => {
+            listDiv.appendChild(createPeerItem(pid, info));
         });
         document.getElementById("peerCount").textContent = state.peers.size;
     }
 
-    function createPeerItem(id, name) {
+    function createPeerItem(id, infoOrName) {
         const div = document.createElement("div");
         div.className = "peer-item" + (state.activeTab === id ? " active" : "");
         div.dataset.id = id;
 
-        // 小圆点: 公共聊天室固定灰色, 其他人看 DataChannel 是否 open
-        let dotColor = "#9ca3af";
+        let info = typeof infoOrName === "string" ? {name: infoOrName, source: "server", online: true} : infoOrName;
+        let displayName = info.name || (id.slice ? id.slice(0, 6) : "");
+
+        // 小圆点颜色逻辑
+        let dotColor = "#9ca3af";  // 默认灰色
+        let dotShadow = "none";
+        let statusTag = "";  // 来源标记（小标签）
+        let tooltip = "";
+
         if (id !== "__public__") {
             const dc = state.dataChannels.get(id);
-            if (dc && dc.readyState === "open") dotColor = "#22c55e";
+            if (dc && dc.readyState === "open") {
+                dotColor = "#22c55e";  // 绿色：P2P 直连已建立
+                dotShadow = "0 0 4px #22c55e";
+                tooltip = "P2P 直连在线";
+            } else if (info.source === "server" && info.online !== false) {
+                dotColor = "#3b82f6";  // 蓝色：信令服务器确认在线
+                dotShadow = "0 0 3px #3b82f6";
+                tooltip = "信令服务器确认在线";
+            } else if (info.source === "gossip") {
+                dotColor = "#a855f7";  // 紫色：通过 gossip 发现
+                dotShadow = "0 0 3px #a855f7";
+                tooltip = "通过 P2P gossip 发现";
+            } else if (info.source === "cache") {
+                dotColor = "#f59e0b";  // 橙色：仅本地缓存
+                dotShadow = "none";
+                tooltip = "仅本地缓存（信令离线）";
+            }
+
+            // 来源小标签
+            if (info.source === "cache") {
+                statusTag = `<span style="font-size:10px;color:#f59e0b;background:#fffbeb;padding:1px 4px;border-radius:3px;border:1px solid #fcd34d;">缓存</span>`;
+            } else if (info.source === "gossip") {
+                statusTag = `<span style="font-size:10px;color:#a855f7;background:#faf5ff;padding:1px 4px;border-radius:3px;border:1px solid #d8b4fe;">Gossip</span>`;
+            }
         }
 
         // 未读数
@@ -986,9 +1151,10 @@
         const badgeText = count > 99 ? "99+" : (count > 0 ? count : "");
 
         div.innerHTML =
-            `<span class="dot" style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;margin-right:8px;vertical-align:middle;box-shadow:${dotColor === "#22c55e" ? "0 0 4px #22c55e" : "none"};"></span>` +
-            `<span class="pname">${name}</span>` +
-            (id !== "__public__" ? `<span class="pid" style="margin-left:auto;">${id.slice(0, 6)}</span>` : "") +
+            `<span class="dot" style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;margin-right:8px;vertical-align:middle;box-shadow:${dotShadow};" title="${tooltip}"></span>` +
+            `<span class="pname">${displayName}</span>` +
+            statusTag +
+            (id !== "__public__" ? `<span class="pid" style="margin-left:auto;font-size:10px;color:#9ca3af;">${id.slice(0, 6)}</span>` : "") +
             `<span class="unread-badge ${badgeText ? "" : "hidden"}">${badgeText}</span>`;
 
         div.onclick = () => selectPeer(id);
@@ -999,7 +1165,7 @@
         log("👆 选中 tab:", id);
         state.activeTab = id;
 
-        // ★ 切换 tab → 清该 peer 未读数
+        // 切换 tab → 清该 peer 未读数
         if (state.unreadCounts.has(id)) {
             state.unreadCounts.set(id, 0);
             const el = document.querySelector(`.peer-item[data-id="${id}"] .unread-badge`);
@@ -1025,7 +1191,7 @@
             return;
         }
 
-        // ★ Caller 仲裁：peer_id 字典序小的才当 caller，避免双向 offer 碰撞
+        // Caller 仲裁：peer_id 字典序小的才当 caller，避免双向 offer 碰撞
         // peer_id 小的一方主动发 offer；peer_id 大的一方等对方的 offer
         if (peerId >= state.myPeerId) {
             log(`  ⏸ 等对方来连（peer_id ${peerId.slice(0, 6)} >= 我 ${state.myPeerId?.slice(0, 6)}）`);
@@ -1057,21 +1223,21 @@
             if (st === "failed" || st === "disconnected" || st === "closed") {
                 state.connections.delete(peerId);
                 state.dataChannels.delete(peerId);
-                state.gossipChannels.delete(peerId);   // ★ 一起清
+                state.gossipChannels.delete(peerId);   // 一起清
             }
         };
 
         conn.ondatachannel = (e) => {
             log("  📥 远端 DataChannel:", e.channel.label);
             if (e.channel.label === "gossip") {
-                setupGossipChannel(e.channel, peerId);  // ★ gossip 单独 setup
+                setupGossipChannel(e.channel, peerId);  // gossip 单独 setup
             } else {
                 setupDataChannel(e.channel, peerId);
             }
         };
 
         if (isCaller) {
-            // ★ Caller 创建两个 DataChannel（callee 通过 ondatachannel 接收）
+            // Caller 创建两个 DataChannel（callee 通过 ondatachannel 接收）
             try {
                 const chatDc = conn.createDataChannel("chat");
                 log("  📤 创建 chat DataChannel");
@@ -1093,11 +1259,11 @@
         }
     }
 
-    // ★ 新增：gossip DataChannel 专用 setup
+    // 新增：gossip DataChannel 专用 setup
     function setupGossipChannel(dc, peerId) {
         dc.onopen = () => {
             log("  🌐 gossip channel OPEN with", peerId.slice(0, 6));
-            // 刚连上就把我认识的 peer 列表推给对方
+            // 刚连上就把我认识的 peer 列表推给对方（含缓存的离线节点）
             gossipSendPeerList(peerId);
         };
         dc.onclose = () => {
@@ -1110,10 +1276,22 @@
                 const msg = JSON.parse(ev.data);
                 if (msg.type === "peer_list") {
                     const newPeers = gossipMergePeers(msg.peers, peerId);
-                    // 如果我发现了新朋友，也告诉对方我这边更新后的完整列表
                     if (newPeers.length > 0) {
-                        gossipSendPeerList(peerId);
+                        gossipSendPeerList(peerId);  // 回报我的完整列表
                     }
+                } else if (msg.type === "signal_relay") {
+                    // 信令中继：对方想通过我把 signal 转发给 target
+                    log(`  🌐 gossip signal_relay from=${msg.from?.slice(0, 6)} target=${msg.target?.slice(0, 6)}`);
+                    gossipHandleSignalRelay(msg, peerId);
+                } else if (msg.type === "signal_relay_forward") {
+                    // 收到被中继过来的 signal（最终目的地收到）
+                    log(`  🌐 收到中继信令 original_from=${msg.original_from?.slice(0, 6)} type=${msg.payload?.type}`);
+                    handleIncomingSignal(msg.original_from, msg.from_name || msg.original_from?.slice(0, 6), msg.payload);
+                } else if (msg.type === "peer_query") {
+                    // 被查询某个 peer 是否在线
+                    gossipHandlePeerQuery(msg, peerId);
+                } else if (msg.type === "peer_query_response") {
+                    log(`  🌐 peer_query_response: ${msg.target?.slice(0, 6)} online=${msg.online}`);
                 }
             } catch (e) {
                 err("  ❌ gossip 消息解析失败:", e);
@@ -1121,27 +1299,99 @@
         };
     }
 
-    // ★ 新增：发送我这边的 peer 列表给指定 peer
+    // gossip 信令中继处理
+    function gossipHandleSignalRelay(msg, fromPeerId) {
+        const target = msg.target;
+        if (!target || !msg.payload) return;
+        // 我就是 target → 直接处理
+        if (target === state.myPeerId) {
+            log(`  🌐 我就是中继目标，直接处理 signal_relay from=${msg.from?.slice(0, 6)}`);
+            handleIncomingSignal(msg.from, msg.from_name || msg.from?.slice(0, 6), msg.payload);
+            return;
+        }
+        // target 是我的 P2P 邻居 → 转发
+        const targetDc = state.gossipChannels.get(target);
+        if (targetDc && targetDc.readyState === "open") {
+            log(`  🌐 我认识 target=${target?.slice(0, 6)}，通过 gossip 转发`);
+            targetDc.send(JSON.stringify({
+                type: "signal_relay_forward",
+                original_from: msg.from,
+                from_name: msg.from_name,
+                payload: msg.payload,
+            }));
+            return;
+        }
+        // 我不认识 target → 失败
+        warn(`  ⚠️ gossip 中继失败：target ${target?.slice(0, 6)} 不在我的邻居列表`);
+        // 回复中继失败
+        const fromDc = state.gossipChannels.get(fromPeerId);
+        if (fromDc && fromDc.readyState === "open") {
+            fromDc.send(JSON.stringify({
+                type: "signal_relay_error",
+                original_from: msg.from,
+                target,
+                reason: "target_unreachable",
+            }));
+        }
+    }
+
+    // peer_query 处理
+    function gossipHandlePeerQuery(msg, fromPeerId) {
+        const target = msg.target;
+        const online = state.peers.has(target) || state.dataChannels.has(target);
+        // 如果 target 是我自己，返回 true
+        const dc = state.gossipChannels.get(fromPeerId);
+        if (dc && dc.readyState === "open") {
+            dc.send(JSON.stringify({
+                type: "peer_query_response",
+                target,
+                online,
+                name: state.peers.get(target)?.name || state.peersCache.get(target)?.name || null,
+            }));
+        }
+    }
+
+    // 发送我这边的 peer 列表给指定 peer（含缓存的离线节点）
     function gossipSendPeerList(toPeerId) {
         const dc = state.gossipChannels.get(toPeerId);
         if (!dc || dc.readyState !== "open") return;
-        const list = [...state.peers.entries()]
-            .filter(([id]) => id !== state.myPeerId)
-            .map(([id, info]) => ({peer_id: id, name: info.name}));
+        // 合并在线 peers 和缓存 peers（去重），但排除自己
+        const merged = new Map();
+        state.peers.forEach((info, pid) => {
+            if (pid !== state.myPeerId) merged.set(pid, {peer_id: pid, name: info.name, online: true});
+        });
+        state.peersCache.forEach((info, pid) => {
+            if (pid !== state.myPeerId && !merged.has(pid)) {
+                merged.set(pid, {peer_id: pid, name: info.name, online: false});
+            }
+        });
+        const list = [...merged.values()];
         dc.send(JSON.stringify({type: "peer_list", from: state.myPeerId, peers: list}));
     }
 
-    // ★ 新增：合并收到的 peer 列表，返回新发现的 peer（用于日志 + 触发连接）
+    // 合并收到的 peer 列表，返回新发现的 peer
     function gossipMergePeers(remotePeers, fromPeerId) {
         const newlyAdded = [];
         (remotePeers || []).forEach(p => {
             if (!p.peer_id || p.peer_id === state.myPeerId) return;
+            const online = p.online !== false;  // 除非明确标离线，否则算在线
             if (!state.peers.has(p.peer_id)) {
-                state.peers.set(p.peer_id, {name: p.name});
-                newlyAdded.push(p.peer_id);
-                log(`  🌐 gossip 发现新 peer: ${p.name} (${p.peer_id.slice(0, 6)}) via ${fromPeerId.slice(0, 6)}`);
-                // 给新 peer 预建 P2P 连接
-                ensureConnection(p.peer_id);
+                state.peers.set(p.peer_id, {
+                    name: p.name || "?",
+                    source: "gossip",
+                    online,
+                });
+                // gossip 发现也保存缓存
+                savePeerToCache(p.peer_id, p.name || "?", "gossip");
+                if (online) newlyAdded.push(p.peer_id);
+                log(`  🌐 gossip 发现新 peer: ${p.name || "?"} (${p.peer_id.slice(0, 6)}) via ${fromPeerId.slice(0, 6)} online=${online}`);
+                if (online) ensureConnection(p.peer_id);
+            } else {
+                // 已存在，更新 source 和 online 状态
+                const existing = state.peers.get(p.peer_id);
+                existing.source = "gossip";
+                existing.online = online;
+                if (p.name && !existing.name) existing.name = p.name;
             }
         });
         if (newlyAdded.length > 0) {
@@ -1154,13 +1404,13 @@
         dc.onopen = () => {
             log("  🌟 DataChannel OPEN peer=", peerId.slice(0, 6));
             if (state.activeTab === peerId) setConnBadge(peerId, "connected");
-            renderPeerList();  // ★ 重绘让小圆点变绿
+            renderPeerList();  // 重绘让小圆点变绿
         };
         dc.onclose = () => {
             log("  ⚠️ DataChannel CLOSE peer=", peerId.slice(0, 6));
             state.dataChannels.delete(peerId);
             if (state.activeTab === peerId) setConnBadge(peerId, "idle");
-            renderPeerList();  // ★ 重绘让小圆点变灰
+            renderPeerList();  // 重绘让小圆点变灰
         };
         dc.onerror = (e) => err("  ❌ DataChannel error:", e);
         dc.onmessage = (ev) => handlePeerMessage(peerId, ev.data);
@@ -1219,9 +1469,47 @@
         }
     }
 
+    // 信令发送器 —— WS 可用时走中央服务器，WS 离线时通过 P2P gossip 网络中继
     function sendSignal(to, payload) {
-        if (!state.ws || state.ws.readyState !== WebSocket.OPEN) return;
-        state.ws.send(JSON.stringify({type: "signal", to, payload}));
+        // 路径 1：信令服务器正常 → 直接走 WS
+        if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+            state.ws.send(JSON.stringify({type: "signal", to, payload}));
+            return true;
+        }
+
+        // 路径 2：信令服务器离线 → 通过 P2P gossip 中继
+        log(`🌐 sendSignal via gossip (WS offline) to=${to?.slice(0, 6)} type=${payload?.type}`);
+
+        // 2a: 直接和 target 有 gossip channel
+        const directDc = state.gossipChannels.get(to);
+        if (directDc && directDc.readyState === "open") {
+            directDc.send(JSON.stringify({
+                type: "signal_relay_forward",
+                original_from: state.myPeerId,
+                from_name: state.myName,
+                payload,
+            }));
+            return true;
+        }
+
+        // 2b: 通过邻居中继 —— 找第一个有 gossip channel 的在线邻居
+        for (const [neighborId, gdc] of state.gossipChannels) {
+            if (gdc.readyState === "open" && neighborId !== to) {
+                // 检查这个邻居是否认识 target（我没有 target 的 gossip，但邻居可能有）
+                gdc.send(JSON.stringify({
+                    type: "signal_relay",
+                    from: state.myPeerId,
+                    from_name: state.myName,
+                    target: to,
+                    payload,
+                }));
+                log(`  🌐 尝试通过 ${neighborId.slice(0, 6)} 中继信令`);
+                return true;
+            }
+        }
+
+        warn(`⚠️ sendSignal 失败：信令离线且没有可用的 gossip 邻居 to=${to?.slice(0, 6)}`);
+        return false;
     }
 
     function closePeerConnection(peerId) {
@@ -1241,7 +1529,7 @@
             }
             state.dataChannels.delete(peerId);
         }
-        const gdc = state.gossipChannels.get(peerId);   // ★ 清 gossip
+        const gdc = state.gossipChannels.get(peerId);   // 清 gossip
         if (gdc) {
             try {
                 gdc.close();
@@ -1249,6 +1537,18 @@
             }
             state.gossipChannels.delete(peerId);
         }
+    }
+
+    // ==================== Peer 缓存节流写入 ====================
+    // 节流写缓存：短时间内多次节点变化只触发一次 localStorage 写入
+    let _peerCacheFlushTimer = null;
+
+    function schedulePeerCacheFlush() {
+        if (_peerCacheFlushTimer) clearTimeout(_peerCacheFlushTimer);
+        _peerCacheFlushTimer = setTimeout(() => {
+            flushPeerCache();
+            _peerCacheFlushTimer = null;
+        }, 1000);
     }
 
     // ==================== 消息 ====================
@@ -1272,6 +1572,10 @@
                         size: msg.size || "", mine: false, ts: msg.ts || Date.now(),
                     });
                     if (tab !== state.activeTab) flashPeer(fromId);
+                } else if (msg.kind === "file_start") {
+                    handleFileStart(fromId, msg);
+                } else if (msg.kind === "file_end") {
+                    handleFileEnd(fromId);
                 }
             } catch {
                 addMessage(fromId, {type: "text", from: fromId, name: fromId.slice(0, 6), text: data, mine: false});
@@ -1285,7 +1589,7 @@
         if (!state.messages.has(tabId)) state.messages.set(tabId, []);
         state.messages.get(tabId).push(msg);
 
-        // ★ 非当前 tab 的消息 → 未读数 +1
+        // 非当前 tab 的消息 → 未读数 +1
         if (tabId !== state.activeTab) {
             const cur = state.unreadCounts.get(tabId) || 0;
             state.unreadCounts.set(tabId, cur + 1);
@@ -1342,7 +1646,7 @@
     }
 
     // 点击图片全屏预览
-    window.__openImg = function(src) {
+    window.__openImg = function (src) {
         const overlay = document.createElement("div");
         overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;";
         overlay.onclick = () => overlay.remove();
@@ -1422,16 +1726,31 @@
             if (dc && dc.readyState === "open") {
                 try {
                     dc.send(JSON.stringify({kind: "chat", ...payload}));
-                    addMessage(peerId, {type: "text", from: state.myPeerId, name: "我", text, mine: true, ts: payload.ts});
+                    addMessage(peerId, {
+                        type: "text",
+                        from: state.myPeerId,
+                        name: "我",
+                        text,
+                        mine: true,
+                        ts: payload.ts
+                    });
                     return;
                 } catch (e) {
                     warn("P2P 发送失败, 降级走 WS:", e.message);
                 }
             }
-            // ★ 降级: 走 WS 中继
+            // 降级: 走 WS 中继
             if (wsOpen) {
                 ws.send(JSON.stringify({type: "chat", to: peerId, payload}));
-                addMessage(peerId, {type: "text", from: state.myPeerId, name: "我", text, mine: true, ts: payload.ts, viaWS: true});
+                addMessage(peerId, {
+                    type: "text",
+                    from: state.myPeerId,
+                    name: "我",
+                    text,
+                    mine: true,
+                    ts: payload.ts,
+                    viaWS: true
+                });
                 logSys("📨 P2P 未就绪, 走服务器中继发送");
             } else {
                 logSys("❌ 发送失败: P2P 和 WS 都不可用");
@@ -1481,15 +1800,30 @@
             state.peers.forEach((info, pid) => {
                 const dc = state.dataChannels.get(pid);
                 if (dc && dc.readyState === "open") {
-                    try { dc.send(JSON.stringify({kind: "image", image: b64, ...payload})); p2pOk.push(pid); }
-                    catch { p2pFail.push(pid); }
-                } else { p2pFail.push(pid); }
+                    try {
+                        dc.send(JSON.stringify({kind: "image", image: b64, ...payload}));
+                        p2pOk.push(pid);
+                    } catch {
+                        p2pFail.push(pid);
+                    }
+                } else {
+                    p2pFail.push(pid);
+                }
             });
             if (p2pFail.length > 0 && wsOpen) {
                 ws.send(JSON.stringify({type: "broadcast", payload: {kind: "image", image: b64, ...payload}}));
             }
             logSys(`🖼️ 图片已发 P2P=${p2pOk.length} WS=${p2pFail.length}`);
-            addMessage("__public__", {type: "image", from: state.myPeerId, name: "我", image: b64, filename: file.name, size: formatSize(file.size), mine: true, ts: payload.ts});
+            addMessage("__public__", {
+                type: "image",
+                from: state.myPeerId,
+                name: "我",
+                image: b64,
+                filename: file.name,
+                size: formatSize(file.size),
+                mine: true,
+                ts: payload.ts
+            });
             return;
         }
 
@@ -1500,13 +1834,34 @@
         if (dcOpen) {
             try {
                 dc.send(JSON.stringify({kind: "image", image: b64, ...payload}));
-                addMessage(peerId, {type: "image", from: state.myPeerId, name: "我", image: b64, filename: file.name, size: formatSize(file.size), mine: true, ts: payload.ts});
+                addMessage(peerId, {
+                    type: "image",
+                    from: state.myPeerId,
+                    name: "我",
+                    image: b64,
+                    filename: file.name,
+                    size: formatSize(file.size),
+                    mine: true,
+                    ts: payload.ts
+                });
                 return;
-            } catch (e) { warn("P2P 发图失败, 降级走 WS:", e.message); }
+            } catch (e) {
+                warn("P2P 发图失败, 降级走 WS:", e.message);
+            }
         }
         if (wsOpen) {
             ws.send(JSON.stringify({type: "chat", to: peerId, payload: {kind: "image", image: b64, ...payload}}));
-            addMessage(peerId, {type: "image", from: state.myPeerId, name: "我", image: b64, filename: file.name, size: formatSize(file.size), mine: true, ts: payload.ts, viaWS: true});
+            addMessage(peerId, {
+                type: "image",
+                from: state.myPeerId,
+                name: "我",
+                image: b64,
+                filename: file.name,
+                size: formatSize(file.size),
+                mine: true,
+                ts: payload.ts,
+                viaWS: true
+            });
             logSys("🖼️ P2P 未就绪, 走服务器中继发图");
         } else {
             logSys("❌ 发图失败: P2P 和 WS 都不可用");
@@ -1633,11 +1988,11 @@
      * 规则：ws://ip:PORT → http://ip:(PORT+1)  (服务端 WS_PORT + 1 = HTTP_API_PORT)
      */
     function getApiBase() {
-            // 直接用当前页面同协议 + 相对路径 /api/
-            // Nginx 反代会把 /api/ 转发到后端 8890
-            const proto = location.protocol;
-            const base = location.host;
-            return `${proto}//${base}/api`;
+        // 直接用当前页面同协议 + 相对路径 /api/
+        // Nginx 反代会把 /api/ 转发到后端 8890
+        const proto = location.protocol;
+        const base = location.host;
+        return `${proto}//${base}/api`;
     }
 
     let authMode = "login";
@@ -1740,9 +2095,11 @@
         showAuthModal("login");
     }
 
-    
-
-    window.onbeforeunload = () => doDisconnect();
+    window.onbeforeunload = () => {
+        // 页面关闭前立即保存节点缓存（节流定时器来不及触发）
+        flushPeerCache();
+        doDisconnect();
+    };
 </script>
 </body>
 </html>
