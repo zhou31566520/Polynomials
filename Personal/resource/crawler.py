@@ -1,6 +1,7 @@
 import argparse
 import base64
 import hashlib
+import io
 import json
 import logging
 import os
@@ -21,12 +22,35 @@ from bs4 import BeautifulSoup
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-if hasattr(sys.stdout, "reconfigure"):
-    try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
+def _force_utf8_stdout():
+    """服务端/locale非UTF-8时, 强制 stdout/stderr 用 UTF-8 包装.
+
+    服务器(尤其是 Docker / cron / SSH 非交互 shell) 常是 C locale,
+    Python 默认用系统编码写 stdout 会把中文写成 ◆ 或直接抛出 UnicodeEncodeError.
+    用 reconfigure + TextIOWrapper 双保险.
+    """
+    for stream_name in ("stdout", "stderr"):
+        stream = getattr(sys, stream_name, None)
+        if stream is None:
+            continue
+        try:
+            if hasattr(stream, "reconfigure"):
+                stream.reconfigure(encoding="utf-8", errors="replace")
+                continue
+        except Exception:
+            pass
+        try:
+            buf = getattr(stream, "buffer", None)
+            if buf is not None:
+                wrapped = io.TextIOWrapper(
+                    buf, encoding="utf-8", errors="replace", line_buffering=True
+                )
+                setattr(sys, stream_name, wrapped)
+        except Exception:
+            pass
+
+_force_utf8_stdout()
+
 warnings.filterwarnings("ignore", message="Unverified HTTPS request")
 
 
